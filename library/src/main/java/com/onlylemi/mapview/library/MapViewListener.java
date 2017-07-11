@@ -16,4 +16,9 @@ public interface MapViewListener {
      * when mapview load error to callback
      */
     void onMapLoadFail();
+
+    /**
+     * when rendering begins (Everything is loaded)
+     */
+    void onBeginRender();
 }

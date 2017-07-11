@@ -42,23 +42,23 @@ public class LocationLayerTestActivity extends AppCompatActivity implements Sens
             e.printStackTrace();
         }
         mapView.loadMap(bitmap);
-        mapView.setMapViewListener(new MapViewListener() {
-            @Override
-            public void onMapLoadSuccess() {
-                locationLayer = new LocationLayer(mapView, new PointF(400, 400));
-                locationLayer.setOpenCompass(true);
-                locationLayer.setCompassIndicatorCircleRotateDegree(60);
-                locationLayer.setCompassIndicatorArrowRotateDegree(-30);
-                mapView.addLayer(locationLayer);
-                mapView.refresh();
-            }
-
-            @Override
-            public void onMapLoadFail() {
-
-            }
-
-        });
+//        mapView.setMapViewListener(new MapViewListener() {
+//            @Override
+//            public void onMapLoadSuccess() {
+//                locationLayer = new LocationLayer(mapView, new PointF(400, 400));
+//                locationLayer.setOpenCompass(true);
+//                locationLayer.setCompassIndicatorCircleRotateDegree(60);
+//                locationLayer.setCompassIndicatorArrowRotateDegree(-30);
+//                mapView.addLayer(locationLayer);
+//                mapView.refresh();
+//            }
+//
+//            @Override
+//            public void onMapLoadFail() {
+//
+//            }
+//
+//        });
 
 
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);

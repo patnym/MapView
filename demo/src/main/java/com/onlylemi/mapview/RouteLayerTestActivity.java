@@ -50,33 +50,33 @@ public class RouteLayerTestActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         mapView.loadMap(bitmap);
-        mapView.setMapViewListener(new MapViewListener() {
-            @Override
-            public void onMapLoadSuccess() {
-                routeLayer = new RouteLayer(mapView);
-                mapView.addLayer(routeLayer);
-
-                markLayer = new MarkLayer(mapView, marks, marksName);
-                mapView.addLayer(markLayer);
-                markLayer.setMarkIsClickListener(new MarkLayer.MarkIsClickListener() {
-                    @Override
-                    public void markIsClick(int num) {
-                        PointF target = new PointF(marks.get(num).x, marks.get(num).y);
-                        List<Integer> routeList = MapUtils.getShortestDistanceBetweenTwoPoints
-                                (marks.get(39), target, nodes, nodesContract);
-                        routeLayer.setNodeList(nodes);
-                        routeLayer.setRouteList(routeList);
-                        mapView.refresh();
-                    }
-                });
-                mapView.refresh();
-            }
-
-            @Override
-            public void onMapLoadFail() {
-            }
-
-        });
+//        mapView.setMapViewListener(new MapViewListener() {
+//            @Override
+//            public void onMapLoadSuccess() {
+//                routeLayer = new RouteLayer(mapView);
+//                mapView.addLayer(routeLayer);
+//
+//                //markLayer = new MarkLayer(mapView, marks, marksName);
+//                //mapView.addLayer(markLayer);
+////                markLayer.setMarkIsClickListener(new MarkLayer.MarkIsClickListener() {
+////                    @Override
+////                    public void markIsClick(int num) {
+////                        PointF target = new PointF(marks.get(num).x, marks.get(num).y);
+////                        List<Integer> routeList = MapUtils.getShortestDistanceBetweenTwoPoints
+////                                (marks.get(39), target, nodes, nodesContract);
+////                        routeLayer.setNodeList(nodes);
+////                        routeLayer.setRouteList(routeList);
+////                        mapView.refresh();
+////                    }
+////                });
+//                mapView.refresh();
+//            }
+//
+//            @Override
+//            public void onMapLoadFail() {
+//            }
+//
+//        });
     }
 
     @Override

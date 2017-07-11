@@ -38,29 +38,29 @@ public class BitmapLayerTestActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         mapView.loadMap(bitmap);
-        mapView.setMapViewListener(new MapViewListener() {
-            @Override
-            public void onMapLoadSuccess() {
-                Log.i(TAG, "onMapLoadSuccess");
-
-                Bitmap bmp = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
-                bitmapLayer = new BitmapLayer(mapView, bmp);
-                bitmapLayer.setLocation(new PointF(400, 400));
-                bitmapLayer.setOnBitmapClickListener(new BitmapLayer.OnBitmapClickListener() {
-                    @Override
-                    public void onBitmapClick(BitmapLayer layer) {
-                        Toast.makeText(getApplicationContext(), "click", Toast.LENGTH_SHORT).show();
-                    }
-                });
-                mapView.addLayer(bitmapLayer);
-                mapView.refresh();
-            }
-
-            @Override
-            public void onMapLoadFail() {
-                Log.i(TAG, "onMapLoadFail");
-            }
-        });
+//        mapView.setMapViewListener(new MapViewListener() {
+//            @Override
+//            public void onMapLoadSuccess() {
+//                Log.i(TAG, "onMapLoadSuccess");
+//
+//                Bitmap bmp = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
+//                bitmapLayer = new BitmapLayer(mapView, bmp);
+//                bitmapLayer.setLocation(new PointF(400, 400));
+//                bitmapLayer.setOnBitmapClickListener(new BitmapLayer.OnBitmapClickListener() {
+//                    @Override
+//                    public void onBitmapClick(BitmapLayer layer) {
+//                        Toast.makeText(getApplicationContext(), "click", Toast.LENGTH_SHORT).show();
+//                    }
+//                });
+//                mapView.addLayer(bitmapLayer);
+//                mapView.refresh();
+//            }
+//
+//            @Override
+//            public void onMapLoadFail() {
+//                Log.i(TAG, "onMapLoadFail");
+//            }
+//        });
     }
 
     @Override

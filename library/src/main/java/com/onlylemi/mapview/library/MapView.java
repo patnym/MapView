@@ -100,7 +100,7 @@ public class MapView extends SurfaceView implements SurfaceHolder.Callback {
                     } else {
                         for (int i = 0; i < layers.size(); i++) {
                             if (layer.level < this.get(i).level) {
-                                super.add(i, layer);
+                                 super.add(i, layer);
                                 break;
                             }
                         }
@@ -118,7 +118,10 @@ public class MapView extends SurfaceView implements SurfaceHolder.Callback {
     public void surfaceCreated(SurfaceHolder holder) {
         this.holder = holder;
         restrictiveBoundingBox = new MapAABB(new PointF(0, 0), getWidth(), getHeight());
-        Log.d(TAG, "MapView AABB inited");
+
+        if(mapViewListener != null)
+            mapViewListener.onBeginRender();
+
         refresh();
     }
 
@@ -179,7 +182,7 @@ public class MapView extends SurfaceView implements SurfaceHolder.Callback {
                         mapViewListener.onMapLoadSuccess();
                     }
                     isMapLoadFinish = true;
-                    refresh();
+                    //refresh();
                 } else {
                     if (mapViewListener != null) {
                         mapViewListener.onMapLoadFail();
