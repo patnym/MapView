@@ -4,6 +4,7 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.view.SurfaceHolder;
 
+import com.onlylemi.mapview.library.camera.MapViewCamera;
 import com.onlylemi.mapview.library.layer.MapBaseLayer;
 import com.onlylemi.mapview.library.utils.MapRenderTimer;
 
@@ -14,6 +15,8 @@ import java.util.List;
  */
 
 public class MapViewRenderer extends Thread {
+
+    private MapViewCamera camera;
 
     private Matrix worldMatrix = new Matrix();
     private float zoom = 1.0f;
@@ -32,13 +35,14 @@ public class MapViewRenderer extends Thread {
 
     public MapViewRenderer() {}
 
-    public MapViewRenderer(SurfaceHolder root, MapView mapView) {
-        init(root, mapView);
+    public MapViewRenderer(SurfaceHolder root, MapView mapView, MapViewCamera camera) {
+        init(root, mapView, camera);
     }
 
-    public void init(SurfaceHolder root, MapView mapView) {
+    public void init(SurfaceHolder root, MapView mapView, MapViewCamera camera) {
         this.root = root;
         this.mapView = mapView;
+        this.camera = camera;
 
         layers = mapView.getLayers();
     }
@@ -65,7 +69,7 @@ public class MapViewRenderer extends Thread {
 
             //Update the different map states
             //// TODO: 2017-08-14 This will be a seperate controller later on
-            mapView.updateModes(frameTimer.getFrameTimeNano());
+            worldMatrix = camera.update(frameTimer.getFrameTimeNano());    //mapView.updateModes(frameTimer.getFrameTimeNano());
 
             for (MapBaseLayer layer : layers) {
                 if (layer.isVisible) {

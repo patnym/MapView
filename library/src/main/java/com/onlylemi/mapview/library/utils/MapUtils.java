@@ -317,6 +317,30 @@ public final class MapUtils {
         }
     }
 
+    public static float[] getMaxMinFromPointList(final List<PointF> pointList, float padding) {
+        PointF initPoint = pointList.get(0);
+
+        //Find max point height and max point width
+        float maxX = initPoint.x;
+        float minX = initPoint.x;
+
+        float maxY = initPoint.y;
+        float minY = initPoint.y;
+
+        for(PointF p : pointList) {
+            //MAX
+            maxX = p.x > maxX ? p.x : maxX;
+            maxY = p.y > maxY ? p.y : maxY;
+
+            //MIN
+            minX = p.x < minX ? p.x : minX;
+            minY = p.y < minY ? p.y : minY;
+        }
+
+        float[] r = { maxX + padding, maxY + padding, minX - padding, minY - padding};
+        return r;
+    }
+
     /**
      * bitmap to picture
      *
@@ -355,7 +379,7 @@ public final class MapUtils {
      * @param baseGraphicsList
      * @return
      */
-    public static List<PointF> getPositionListFromGraphicList(List<BaseGraphics> baseGraphicsList) {
+    public static List<PointF> getPositionListFromGraphicList(List<? extends BaseGraphics> baseGraphicsList) {
 
         List<PointF> returnList = new ArrayList();
 

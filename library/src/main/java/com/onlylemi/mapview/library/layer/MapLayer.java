@@ -58,7 +58,7 @@ public class MapLayer extends MapBaseLayer {
     private void initMapLayer() {
         float zoom = getInitZoom(mapView.getWidth(), mapView.getHeight(), bmp.getWidth(), bmp
                 .getHeight());
-        Log.i(TAG, Float.toString(zoom));
+
         mapView.initZoom(zoom, 0, 0);
 
         float width = mapView.getWidth() - zoom * bmp.getWidth();
@@ -67,15 +67,7 @@ public class MapLayer extends MapBaseLayer {
         paint = new Paint();
         paint.setAntiAlias(true);
 
-        //Create AABB
-        //Deprecated
-        //mapBoundingBox = new MapAABB( new PointF(0, 0), this.bmp.getWidth(), this.bmp.getHeight());
-
         mapView.translate(width / 2, height / 2);
-
-        //Update the bounding box once
-        //Deprecated
-        //mapBoundingBox.update(mapView.getCurrentTransform());
     }
 
     /**
@@ -91,9 +83,6 @@ public class MapLayer extends MapBaseLayer {
                               float imageHeight) {
         float widthRatio = viewWidth / imageWidth;
         float heightRatio = viewHeight / imageHeight;
-
-        Log.i(TAG, "widthRatio:" + widthRatio);
-        Log.i(TAG, "widthRatio:" + heightRatio);
 
         if (widthRatio * imageHeight <= viewHeight) {
             return widthRatio;

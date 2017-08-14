@@ -11,6 +11,7 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import com.onlylemi.mapview.library.camera.MapViewCamera;
 import com.onlylemi.mapview.library.graphics.BaseGraphics;
 import com.onlylemi.mapview.library.graphics.implementation.LocationUser;
 import com.onlylemi.mapview.library.layer.MapBaseLayer;
@@ -68,6 +69,8 @@ public class MapView extends SurfaceView implements SurfaceHolder.Callback {
     //Main rendering thread
     private MapViewRenderer thread = new MapViewRenderer();
 
+    private MapViewCamera camera = new MapViewCamera();
+
     public MapView(Context context) {
         this(context, null);
     }
@@ -115,15 +118,22 @@ public class MapView extends SurfaceView implements SurfaceHolder.Callback {
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         if (thread == null || thread.getState() == Thread.State.TERMINATED){
-            thread = new MapViewRenderer(holder, this);
-            thread.setRunning(true);
-            thread.start();  // Start a new thread
-        }
-        else if(thread.getState() == Thread.State.NEW){
-            thread.init(holder, this);
+            initalizeCamera();
+            thread = new MapViewRenderer(holder, this, this.camera);
             thread.setRunning(true);
             thread.start();
         }
+        else if(thread.getState() == Thread.State.NEW){
+            initalizeCamera();
+            thread.init(holder, this, this.camera);
+            thread.setRunning(true);
+            thread.start();
+        }
+    }
+
+    private void initalizeCamera() {
+        this.camera.setViewHeight(getHeight());
+        this.camera.setViewWidth(getWidth());
     }
 
     @Override
@@ -215,10 +225,8 @@ public class MapView extends SurfaceView implements SurfaceHolder.Callback {
                 }
                 break;
             case MotionEvent.ACTION_UP:
-                if (withFloorPlan(event.getX(), event.getY())) {
-                    for (MapBaseLayer layer : layers) {
-                        layer.onTouch(event);
-                    }
+                for (MapBaseLayer layer : layers) {
+                    layer.onTouch(event);
                 }
                 currentTouchState = MapView.TOUCH_STATE_NO;
                 break;
@@ -269,131 +277,131 @@ public class MapView extends SurfaceView implements SurfaceHolder.Callback {
      */
     private float currentFreeModeTime = 0.0f;
 
-    /**
-     * update all different modes enabled, like center on user, zoom on points etc
-     */
-    public void updateModes(float deltaTime) {
-        //// TODO: 2017-08-14 this is a hack, when we move these functiosn to seperate modes we will pass the matrix and zoom
-        Matrix currentMatrix = thread.getWorldMatrix();
-        float currentZoom = thread.getZoom();
-
-        switch (mode) {
-            case FREE:
-                currentFreeModeTime -= deltaTime;
-                if(currentFreeModeTime <= 0.0f) {
-                    //Reset mode
-                    mode = oldMode;
-                }
-
-                break;
-            case ZOOM_WITHIN_POINTS: {
-                //This is stupid, how do I make this "move" towards a target in a good way?
-                //This could in future be state based instead. Just remember the state each time and if it does not update we use the old state
-                //// TODO: 2017-08-08 This is a refactor stage later on, this works atm and its fine until a later version
-                //Handles the zooming
-                float[] minmax = getMaxMinFromPointList(MapUtils.getPositionListFromGraphicList(zoomPoints), modeOptions.zoomWithinPointsPixelPadding);
-                float zoom = getZoomWithinPoints(minmax[0], minmax[1], minmax[2], minmax[3]);
-                float d = zoom - currentZoom;
-                int sign = (int) (d / Math.abs(d));
-                d = d * sign; //Absolute distance
-                float zVelocity = modeOptions.zoomPerNanoSecond * sign * deltaTime;
-                d -= Math.abs(zVelocity);
-
-                //move towards target using velocity
-                if (d <= 0.0f) {
-                    setCurrentZoom(zoom);
-                } else {
-                    setCurrentZoom(currentZoom + zVelocity);
-                }
-
-
-                //My point on the view coordinate system
-                PointF dst = MapMath.getMidPointBetweenTwoPoints(minmax[0], minmax[1], minmax[2], minmax[3]);
-                float[] b = {dst.x, dst.y};
-                currentMatrix.mapPoints(b);
-
-                //My point in view coords
-                dst.x = b[0];
-                dst.y = b[1];
-
-                //Mid point of the view coordinate system
-                PointF trueMid = new PointF(getWidth() / 2, getHeight() / 2);
-
-                //Direction - NOTE we are going from the mid towards our point because graphics yo
-                PointF desti = new PointF(trueMid.x - b[0], trueMid.y - b[1]);
-
-                //This is also the distance from our point to the middle
-                float distance = desti.length();
-
-                PointF dir = new PointF();
-
-                dir.x = desti.x / distance;
-                dir.y = desti.y / distance;
-
-                //Get position from currentMatrix
-                float[] m = new float[9];
-                currentMatrix.getValues(m);
-
-                //Current position
-                PointF pos = new PointF(m[2], m[5]);
-
-                distance -= modeOptions.translationsPixelsPerNanoSecond * deltaTime;
-
-                if (distance <= 0.0f) {
-                    currentMatrix.postTranslate(desti.x, desti.y);
-                } else {
-                    currentMatrix.postTranslate(dir.x * modeOptions.translationsPixelsPerNanoSecond * deltaTime, dir.y * modeOptions.translationsPixelsPerNanoSecond * deltaTime);
-                }
-                thread.setWorldMatrix(currentMatrix);
-                break;
-            }
-            case FOLLOW_USER: {
-                //My point on the view coordinate system
-                PointF dst = new PointF();
-                dst.set(user.getPosition());
-                float[] b = {dst.x, dst.y};
-                currentMatrix.mapPoints(b);
-
-                //My point in view coords
-                dst.x = b[0];
-                dst.y = b[1];
-
-                //Mid point of the view coordinate system
-                PointF trueMid = new PointF(getWidth() / 2, getHeight() / 2);
-
-                //Direction - NOTE we are going from the mid towards our point because graphics yo
-                PointF desti = new PointF(trueMid.x - b[0], trueMid.y - b[1]);
-
-                //This is also the distance from our point to the middle
-                float distance = desti.length();
-
-                PointF dir = new PointF();
-
-                dir.x = desti.x / distance;
-                dir.y = desti.y / distance;
-
-                //Get position from currentMatrix
-                float[] m = new float[9];
-                currentMatrix.getValues(m);
-
-                //Current position
-                PointF pos = new PointF(m[2], m[5]);
-
-                distance -= modeOptions.translationsPixelsPerNanoSecond * deltaTime;
-
-                if (distance <= 0.0f) {
-                    currentMatrix.postTranslate(desti.x, desti.y);
-                } else {
-                    currentMatrix.postTranslate(dir.x * modeOptions.translationsPixelsPerNanoSecond * deltaTime, dir.y * modeOptions.translationsPixelsPerNanoSecond * deltaTime);
-                }
-
-                thread.setWorldMatrix(currentMatrix);
-                break;
-            }
-            default:
-
-        }
-    }
+//    /**
+//     * update all different modes enabled, like center on user, zoom on points etc
+//     */
+//    public void updateModes(float deltaTime) {
+//        //// TODO: 2017-08-14 this is a hack, when we move these functiosn to seperate modes we will pass the matrix and zoom
+//        Matrix currentMatrix = thread.getWorldMatrix();
+//        float currentZoom = thread.getZoom();
+//
+//        switch (mode) {
+//            case FREE:
+//                currentFreeModeTime -= deltaTime;
+//                if(currentFreeModeTime <= 0.0f) {
+//                    //Reset mode
+//                    mode = oldMode;
+//                }
+//
+//                break;
+//            case ZOOM_WITHIN_POINTS: {
+//                //This is stupid, how do I make this "move" towards a target in a good way?
+//                //This could in future be state based instead. Just remember the state each time and if it does not update we use the old state
+//                //// TODO: 2017-08-08 This is a refactor stage later on, this works atm and its fine until a later version
+//                //Handles the zooming
+//                float[] minmax = getMaxMinFromPointList(MapUtils.getPositionListFromGraphicList(zoomPoints), modeOptions.zoomWithinPointsPixelPadding);
+//                float zoom = getZoomWithinPoints(minmax[0], minmax[1], minmax[2], minmax[3]);
+//                float d = zoom - currentZoom;
+//                int sign = (int) (d / Math.abs(d));
+//                d = d * sign; //Absolute distance
+//                float zVelocity = modeOptions.zoomPerNanoSecond * sign * deltaTime;
+//                d -= Math.abs(zVelocity);
+//
+//                //move towards target using velocity
+//                if (d <= 0.0f) {
+//                    setCurrentZoom(zoom);
+//                } else {
+//                    setCurrentZoom(currentZoom + zVelocity);
+//                }
+//
+//
+//                //My point on the view coordinate system
+//                PointF dst = MapMath.getMidPointBetweenTwoPoints(minmax[0], minmax[1], minmax[2], minmax[3]);
+//                float[] b = {dst.x, dst.y};
+//                currentMatrix.mapPoints(b);
+//
+//                //My point in view coords
+//                dst.x = b[0];
+//                dst.y = b[1];
+//
+//                //Mid point of the view coordinate system
+//                PointF trueMid = new PointF(getWidth() / 2, getHeight() / 2);
+//
+//                //Direction - NOTE we are going from the mid towards our point because graphics yo
+//                PointF desti = new PointF(trueMid.x - b[0], trueMid.y - b[1]);
+//
+//                //This is also the distance from our point to the middle
+//                float distance = desti.length();
+//
+//                PointF dir = new PointF();
+//
+//                dir.x = desti.x / distance;
+//                dir.y = desti.y / distance;
+//
+//                //Get position from currentMatrix
+//                float[] m = new float[9];
+//                currentMatrix.getValues(m);
+//
+//                //Current position
+//                PointF pos = new PointF(m[2], m[5]);
+//
+//                distance -= modeOptions.translationsPixelsPerNanoSecond * deltaTime;
+//
+//                if (distance <= 0.0f) {
+//                    currentMatrix.postTranslate(desti.x, desti.y);
+//                } else {
+//                    currentMatrix.postTranslate(dir.x * modeOptions.translationsPixelsPerNanoSecond * deltaTime, dir.y * modeOptions.translationsPixelsPerNanoSecond * deltaTime);
+//                }
+//                thread.setWorldMatrix(currentMatrix);
+//                break;
+//            }
+//            case FOLLOW_USER: {
+//                //My point on the view coordinate system
+//                PointF dst = new PointF();
+//                dst.set(user.getPosition());
+//                float[] b = {dst.x, dst.y};
+//                currentMatrix.mapPoints(b);
+//
+//                //My point in view coords
+//                dst.x = b[0];
+//                dst.y = b[1];
+//
+//                //Mid point of the view coordinate system
+//                PointF trueMid = new PointF(getWidth() / 2, getHeight() / 2);
+//
+//                //Direction - NOTE we are going from the mid towards our point because graphics yo
+//                PointF desti = new PointF(trueMid.x - b[0], trueMid.y - b[1]);
+//
+//                //This is also the distance from our point to the middle
+//                float distance = desti.length();
+//
+//                PointF dir = new PointF();
+//
+//                dir.x = desti.x / distance;
+//                dir.y = desti.y / distance;
+//
+//                //Get position from currentMatrix
+//                float[] m = new float[9];
+//                currentMatrix.getValues(m);
+//
+//                //Current position
+//                PointF pos = new PointF(m[2], m[5]);
+//
+//                distance -= modeOptions.translationsPixelsPerNanoSecond * deltaTime;
+//
+//                if (distance <= 0.0f) {
+//                    currentMatrix.postTranslate(desti.x, desti.y);
+//                } else {
+//                    currentMatrix.postTranslate(dir.x * modeOptions.translationsPixelsPerNanoSecond * deltaTime, dir.y * modeOptions.translationsPixelsPerNanoSecond * deltaTime);
+//                }
+//
+//                thread.setWorldMatrix(currentMatrix);
+//                break;
+//            }
+//            default:
+//
+//        }
+//    }
 
     /**
      * set mapview listener
@@ -449,9 +457,10 @@ public class MapView extends SurfaceView implements SurfaceHolder.Callback {
     }
 
     public void translate(float x, float y) {
-        Matrix translateMatrix = thread.getWorldMatrix();
-        translateMatrix.postTranslate(x, y);
-        thread.setWorldMatrix(translateMatrix);
+//        Matrix translateMatrix = thread.getWorldMatrix();
+//        translateMatrix.postTranslate(x, y);
+//        thread.setWorldMatrix(translateMatrix);
+        camera.translate(x, y);
     }
 
     private PointF position = new PointF(0,0);
@@ -504,53 +513,28 @@ public class MapView extends SurfaceView implements SurfaceHolder.Callback {
 
     /**
      * Inits the zooming
-     * TODO(Nyman): Should add a padding variable to zooming aswell
      * @param zoom init min zoom
      * @param x
      * @param y
      */
     public void initZoom(float zoom, float x, float y) {
-        setCurrentZoom(zoom, x, y);
-        minZoom = zoom + modeOptions.zoomMinPadding;
-        maxZoom = zoom + modeOptions.zoomMaxPadding;
+        camera.setMinZoom(zoom + modeOptions.zoomMinPadding);
+        camera.setMaxZoom(zoom + modeOptions.zoomMaxPadding);
+        camera.updateZoom(zoom, x, y);
     }
 
-    /**
-     * Takes a set of positions and zoom to the max value that will show all positions.
-     * Also moves the camera to the middle position of all positions
-     * @param pointList
-     */
-    public void zoomWithinPoints(final List<PointF> pointList) {
-        float[] minmax = getMaxMinFromPointList(pointList, 0.0f);
-
-        setCurrentZoom(getZoomWithinPoints(minmax[0], minmax[1], minmax[2], minmax[3]), 0, 0);
-        PointF midPoint = MapMath.getMidPointBetweenTwoPoints(minmax[0], minmax[1], minmax[2], minmax[3]);
-        mapCenterWithPoint(midPoint.x, midPoint.y);
-    }
-
-    private float[] getMaxMinFromPointList(final List<PointF> pointList, float padding) {
-        PointF initPoint = pointList.get(0);
-
-        //Find max point height and max point width
-        float maxX = initPoint.x;
-        float minX = initPoint.x;
-
-        float maxY = initPoint.y;
-        float minY = initPoint.y;
-
-        for(PointF p : pointList) {
-            //MAX
-            maxX = p.x > maxX ? p.x : maxX;
-            maxY = p.y > maxY ? p.y : maxY;
-
-            //MIN
-            minX = p.x < minX ? p.x : minX;
-            minY = p.y < minY ? p.y : minY;
-        }
-
-        float[] r = { maxX + padding, maxY + padding, minX - padding, minY - padding};
-        return r;
-    }
+//    /**
+//     * Takes a set of positions and zoom to the max value that will show all positions.
+//     * Also moves the camera to the middle position of all positions
+//     * @param pointList
+//     */
+//    public void zoomWithinPoints(final List<PointF> pointList) {
+//        float[] minmax = getMaxMinFromPointList(pointList, 0.0f);
+//
+//        setCurrentZoom(getZoomWithinPoints(minmax[0], minmax[1], minmax[2], minmax[3]), 0, 0);
+//        PointF midPoint = MapMath.getMidPointBetweenTwoPoints(minmax[0], minmax[1], minmax[2], minmax[3]);
+//        mapCenterWithPoint(midPoint.x, midPoint.y);
+//    }
 
     private float getZoomWithinPoints(float maxX, float maxY, float minX, float minY) {
         float imageWidth = maxX - minX;
@@ -614,7 +598,11 @@ public class MapView extends SurfaceView implements SurfaceHolder.Callback {
     }
 
     public void setTrackingMode(TRACKING_MODE mode) {
-        this.mode = mode;
+        if(mode == TRACKING_MODE.FOLLOW_USER){
+            camera.setFollowUserMode(user);
+        }else if(mode == TRACKING_MODE.ZOOM_WITHIN_POINTS) {
+            camera.setContainGraphicsMode(zoomPoints);
+        }
     }
 
     private PointF midPoint(MotionEvent event) {
@@ -627,23 +615,6 @@ public class MapView extends SurfaceView implements SurfaceHolder.Callback {
                 , mid.x, mid.y);
     }
 
-    private float rotation(MotionEvent event, PointF mid) {
-        return MapMath.getDegreeBetweenTwoPoints(event.getX(0), event.getY(0)
-                , mid.x, mid.y);
-    }
-
-    /**
-     * point is/not in floor plan
-     *
-     * @param x
-     * @param y
-     * @return
-     */
-    public boolean withFloorPlan(float x, float y) {
-        float[] goal = convertMapXYToScreenXY(x, y);
-        return goal[0] > 0 && goal[0] < mapLayer.getImage().getWidth() && goal[1] > 0
-                && goal[1] < mapLayer.getImage().getHeight();
-    }
 
     public float getMapWidth() {
         return mapLayer.getImage().getWidth();
