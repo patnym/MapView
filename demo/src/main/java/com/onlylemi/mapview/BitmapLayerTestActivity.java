@@ -53,7 +53,6 @@ public class BitmapLayerTestActivity extends AppCompatActivity {
                     }
                 });
                 mapView.addLayer(bitmapLayer);
-                mapView.refresh();
             }
 
             @Override
@@ -78,7 +77,6 @@ public class BitmapLayerTestActivity extends AppCompatActivity {
                     int x = new Random().nextInt((int) mapView.getMapWidth());
                     int y = new Random().nextInt((int) mapView.getMapHeight());
                     bitmapLayer.setLocation(new PointF(x, y));
-                    mapView.refresh();
                     break;
                 case R.id.bitmap_layer_set_mode:
                     // change bmp is/not scale

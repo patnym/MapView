@@ -20,7 +20,8 @@
         </activity>
         <activity
             android:name=".MapLayerTestActivity"
-            android:label="MapLayerTest">
+            android:label="MapLayerTest"
+            android:screenOrientation="reverseLandscape">
         </activity>
         <activity
             android:name=".LocationLayerTestActivity"
