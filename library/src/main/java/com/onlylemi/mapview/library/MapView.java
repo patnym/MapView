@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.PointF;
+import android.location.Location;
 import android.os.Message;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -14,6 +15,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 
+import com.onlylemi.mapview.library.camera.MapViewCamera;
 import com.onlylemi.mapview.library.graphics.BaseGraphics;
 import com.onlylemi.mapview.library.graphics.IBackground;
 import com.onlylemi.mapview.library.graphics.implementation.LocationUser;
@@ -779,6 +781,13 @@ public class MapView extends SurfaceView implements SurfaceHolder.Callback, Chor
         this.mode = mode;
     }
 
+    public MapViewCamera getCamera() {
+        if(thread != null) {
+            return thread.getCamera();
+        }
+        return null;
+    }
+
     private PointF midPoint(MotionEvent event) {
         return MapMath.getMidPointBetweenTwoPoints(event.getX(0), event.getY(0)
                 , event.getX(1), event.getY(1));
@@ -825,6 +834,10 @@ public class MapView extends SurfaceView implements SurfaceHolder.Callback, Chor
 
     public void setUser(LocationUser user) {
         this.user = user;
+    }
+
+    public LocationUser getUser() {
+        return user;
     }
 
     public void centerOnUser(LocationUser user) {

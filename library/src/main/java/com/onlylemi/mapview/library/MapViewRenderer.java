@@ -78,7 +78,7 @@ public class MapViewRenderer extends Thread {
         background = new ColorBackground(Color.BLACK);
         layers = mapView.getLayers();
         camera = new MapViewCamera(this.mapView);
-
+        camera.setUser(mapView.getUser());
         inputQueue = new ArrayList<>();
     }
 
@@ -251,6 +251,10 @@ public class MapViewRenderer extends Thread {
 
     public void setBackground(IBackground background) {
         this.background = background;
+    }
+
+    public MapViewCamera getCamera() {
+        return camera;
     }
 
     //endregion

@@ -3,6 +3,7 @@ package com.onlylemi.mapview.library.camera;
 import android.util.Log;
 
 import com.onlylemi.mapview.library.camera.modes.ICameraState;
+import com.onlylemi.mapview.library.camera.modes.implementation.ContainUserCameraState;
 import com.onlylemi.mapview.library.camera.modes.implementation.FreeCameraState;
 
 /**
@@ -26,6 +27,9 @@ class CameraModeFactory {
         switch (mode) {
             case FREE:
                 returnState = new FreeCameraState();
+                break;
+            case CONTAIN_USER:
+                returnState = new ContainUserCameraState(camera);
                 break;
             default:
                 //shouldnt happen

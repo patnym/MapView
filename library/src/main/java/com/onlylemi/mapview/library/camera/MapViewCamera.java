@@ -126,7 +126,7 @@ public class MapViewCamera {
      * Changes the current camera mode
      * @param mode
      */
-    public void changeMode(CameraMode mode) {
+    public synchronized void changeMode(CameraMode mode) {
         previousCameraState = currentCameraState;
         currentCameraState = CameraModeFactory.createMode(mode, this);
 
@@ -190,18 +190,6 @@ public class MapViewCamera {
 
             viewMatrix.setValues(v);
         }
-    }
-
-    public void setCurrentZoom(float zoom) {
-        setCurrentZoom(zoom, viewPortWidth / 2, viewPortHeight / 2);
-    }
-
-    public void setCurrentZoom(float zoom, float x, float y) {
-        float scale = MapMath.truncateNumber(zoom, minZoom, maxZoom);
-
-        viewMatrix.postScale(scale / currentZoom, scale / currentZoom, x, y);
-
-        currentZoom = scale;
     }
 
     //endregion
@@ -279,6 +267,38 @@ public class MapViewCamera {
 
     public void setMapView(MapView mapView) {
         this.mapView = mapView;
+    }
+
+    public void setCurrentZoom(float zoom) {
+        setCurrentZoom(zoom, viewPortWidth / 2, viewPortHeight / 2);
+    }
+
+    public void setCurrentZoom(float zoom, float x, float y) {
+        float scale = MapMath.truncateNumber(zoom, minZoom, maxZoom);
+
+        viewMatrix.postScale(scale / currentZoom, scale / currentZoom, x, y);
+
+        currentZoom = scale;
+    }
+
+    public float getCurrentZoom() {
+        return currentZoom;
+    }
+
+    public Matrix getViewMatrix() {
+        return viewMatrix;
+    }
+
+    public void setViewMatrix(Matrix viewMatrix) {
+        this.viewMatrix = viewMatrix;
+    }
+
+    public float getViewPortWidth() {
+        return viewPortWidth;
+    }
+
+    public float getViewPortHeight() {
+        return viewPortHeight;
     }
 
     //endregion
