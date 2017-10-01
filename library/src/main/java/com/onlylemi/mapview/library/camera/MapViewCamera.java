@@ -14,6 +14,8 @@ import com.onlylemi.mapview.library.utils.BasicInput;
 import com.onlylemi.mapview.library.utils.MapMath;
 import com.onlylemi.mapview.library.utils.MapUtils;
 
+import java.util.Map;
+
 /**
  * Copyright (C) 9/30/17 nyman (patnym) - All Rights Reserved
  * You may use, distribute and modify this code under the
@@ -63,8 +65,11 @@ public class MapViewCamera {
     private ICameraState currentCameraState;
     private ICameraState previousCameraState;
 
+    //Temp values used to handle touch events
     private TouchState currentTouchState = TouchState.TOUCH_STATE_NO; // default touch state
     private PointF startTouch = new PointF();
+    private float saveZoom;
+    private float oldDist;
 
 
     public MapViewCamera(MapView mapView) {
@@ -147,6 +152,7 @@ public class MapViewCamera {
         Log.v(TAG, "Reverted to previous mode: " + currentCameraState.toString());
     }
 
+    //region zoom
 
     /**
      * Calculate max and min zoom
@@ -198,12 +204,13 @@ public class MapViewCamera {
         currentZoom = scale;
     }
 
+    //endregion
+
     //region touchevents
 
     //Handle touch events
     public boolean onTouch(BasicInput event) {
         float newDist;
-        float currentZoom = 0;
 
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN:
@@ -211,15 +218,12 @@ public class MapViewCamera {
                 currentTouchState = TouchState.TOUCH_STATE_SCROLL;
                 break;
             case MotionEvent.ACTION_POINTER_DOWN:
-//                if (event.getPointerCount() == 2) {
-//                    saveMatrix.set(currentMatrix);
-//                    saveZoom = currentZoom;
-//                    startTouch.set(event.getX(0), event.getY(0));
-//                    currentTouchState = TouchState.TOUCH_STATE_TWO_POINTED;
-//
-//                    mid = midPoint(event);
-//                    oldDist = distance(event, mid);
-//                }
+                if (event.getPointerCount() == 2) {
+                    saveZoom = currentZoom;
+                    currentTouchState = TouchState.TOUCH_STATE_TWO_POINTED;
+
+                    startTouch = MapMath.getMidPointBetweenTwoPoints(event.getX(0), event.getY(0), event.getX(1), event.getY(1));
+                }
                 break;
             case MotionEvent.ACTION_UP:
                 currentTouchState = TouchState.TOUCH_STATE_NO;
@@ -237,30 +241,16 @@ public class MapViewCamera {
                                 startTouch.y);
                         startTouch.set(event.getX(), event.getY());
                         break;
-//                    case TOUCH_STATE_TWO_POINTED:
-//                        oldDist = distance(event, mid);
-//                        currentTouchState = TouchState.TOUCH_STATE_SCALE;
-//                        break;
-//                    case TOUCH_STATE_SCALE:
-//                        oldMode = mode == mode.FREE ? oldMode : mode;
-//                        currentFreeModeTime = modeOptions.returnFromFreeModeDelayNanoSeconds;
-//                        mode = MapView.TRACKING_MODE.FREE;
-//                        currentMatrix.set(saveMatrix);
-//                        newDist = distance(event, mid);
-//                        float scale = newDist / oldDist;
-//
-//                        if (scale * saveZoom < minZoom) {
-//                            scale = minZoom / saveZoom;
-//                        } else if (scale * saveZoom > maxZoom) {
-//                            scale = maxZoom / saveZoom;
-//                        }
-//                        thread.setZoom(scale * saveZoom);
-//
-//                        PointF initPoint = isFollowUser ? user.getWorldPosition() : mid;
-//
-//                        currentMatrix.postScale(scale, scale, initPoint.x, initPoint.y);
-//                        thread.setWorldMatrix(currentMatrix);
-//                        break;
+                    case TOUCH_STATE_TWO_POINTED:
+                        oldDist = MapMath.getDistanceBetweenTwoPoints(event.getX(0), event.getY(0), startTouch.x, startTouch.y);
+                        currentTouchState = TouchState.TOUCH_STATE_SCALE;
+                        break;
+                    case TOUCH_STATE_SCALE:
+                        newDist = MapMath.getDistanceBetweenTwoPoints(event.getX(0), event.getY(0), startTouch.x, startTouch.y);
+                        float scale = newDist / oldDist;
+
+                        setCurrentZoom(saveZoom * scale, startTouch.x, startTouch.y);
+                        break;
                     default:
                         break;
                 }
