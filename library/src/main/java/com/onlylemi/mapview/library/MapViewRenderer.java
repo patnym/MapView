@@ -50,7 +50,6 @@ public class MapViewRenderer extends Thread {
     private boolean paused = false;
 
     //// TODO: 10/1/17 This could be optimized, this could stress the GC
-    private boolean handleInput = false; //gets flagged if there is input to handle
     private List<BasicInput> inputQueue;
 
     private Handler messageHandler;
@@ -78,7 +77,7 @@ public class MapViewRenderer extends Thread {
         //Default background is black
         background = new ColorBackground(Color.BLACK);
         layers = mapView.getLayers();
-        camera = new MapViewCamera();
+        camera = new MapViewCamera(this.mapView);
 
         inputQueue = new ArrayList<>();
     }
@@ -102,14 +101,10 @@ public class MapViewRenderer extends Thread {
                     doFrame((((long) msg.arg1) << 32) |
                             (((long) msg.arg2) & 0xffffffffL));
                 }
-//                else if(msg.what == 2) {
-//                    MotionEvent event = (MotionEvent) msg.obj;
-//                    camera.onTouch(event);
-//                } else {
-//                    Log.v(TAG, "Got a bogus message");
-//                }
             }
         };
+
+        camera.init();
 
         synchronized (pauseLock) {
             paused = false;

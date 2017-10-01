@@ -8,8 +8,11 @@ import android.view.MotionEvent;
 import com.onlylemi.mapview.library.MapView;
 import com.onlylemi.mapview.library.camera.modes.ICameraState;
 import com.onlylemi.mapview.library.camera.modes.implementation.FreeCameraState;
+import com.onlylemi.mapview.library.graphics.implementation.LocationUser;
 import com.onlylemi.mapview.library.layer.MapBaseLayer;
 import com.onlylemi.mapview.library.utils.BasicInput;
+import com.onlylemi.mapview.library.utils.MapMath;
+import com.onlylemi.mapview.library.utils.MapUtils;
 
 /**
  * Copyright (C) 9/30/17 nyman (patnym) - All Rights Reserved
@@ -43,6 +46,16 @@ public class MapViewCamera {
 
     private Matrix viewMatrix;
 
+    private float currentZoom = 1.0f; //aka no zoom
+
+    private float maxZoom;
+    private float minZoom;
+
+    private LocationUser user;
+
+    //// TODO: 10/1/17 Might not be needed later on, but currently everything is a bit messy, this helps until more cleaing is done
+    private MapView mapView;
+
     //Represents the width and height of the view (AKA - the canvas size)
     private float viewPortWidth;
     private float viewPortHeight;
@@ -54,11 +67,20 @@ public class MapViewCamera {
     private PointF startTouch = new PointF();
 
 
-    public MapViewCamera() {
+    public MapViewCamera(MapView mapView) {
+        this.mapView = mapView;
         viewMatrix = new Matrix();
 
         //Default to free camera state
         changeMode(CameraMode.FREE);
+    }
+
+    /**
+     * Called from the render thread when it starts rendering
+     * Will get called after the first call to onSurfaceChangedd
+     */
+    public void init() {
+        initZoom(true);
     }
 
     /**
@@ -76,6 +98,9 @@ public class MapViewCamera {
         if(currentCameraState != null) {
             currentCameraState.onViewPortChanged(width, height, this);
         }
+
+        //Recalculate zoom values
+        initZoom(false);
     }
 
     /**
@@ -121,6 +146,60 @@ public class MapViewCamera {
         previousCameraState = tempState;
         Log.v(TAG, "Reverted to previous mode: " + currentCameraState.toString());
     }
+
+
+    /**
+     * Calculate max and min zoom
+     * @param centerZoom if true will also center the map and set the zoom to show the entire map
+     */
+    private void initZoom(boolean centerZoom) {
+        float widthRatio = viewPortWidth / mapView.getMapWidth();
+        float heightRatio = viewPortHeight / mapView.getMapHeight();
+
+        Log.i(TAG, "widthRatio:" + widthRatio);
+        Log.i(TAG, "heightRatio:" + heightRatio);
+
+        float idealZoom = 1.0f;
+        if (widthRatio * mapView.getMapHeight() <= viewPortHeight) {
+            idealZoom = widthRatio;
+        } else if (heightRatio * mapView.getMapWidth() <= viewPortWidth) {
+            idealZoom = heightRatio;
+        }
+
+        maxZoom = idealZoom + mapView.getMapModeOptions().zoomMaxPadding;
+        minZoom = idealZoom + mapView.getMapModeOptions().zoomMinPadding;
+
+        if(centerZoom) {
+            setCurrentZoom(idealZoom, 0, 0);
+
+            //Translate map to middle
+            float midX = (viewPortWidth - mapView.getMapWidth() * currentZoom) / 2;
+            float midY = (viewPortHeight - mapView.getMapHeight() * currentZoom) / 2;
+
+            float[] v = new float[9];
+            viewMatrix.getValues(v);
+
+            v[2] = midX;
+            v[5] = midY;
+
+            viewMatrix.setValues(v);
+        }
+    }
+
+    public void setCurrentZoom(float zoom) {
+        setCurrentZoom(zoom, viewPortWidth / 2, viewPortHeight / 2);
+    }
+
+    public void setCurrentZoom(float zoom, float x, float y) {
+        float scale = MapMath.truncateNumber(zoom, minZoom, maxZoom);
+
+        viewMatrix.postScale(scale / currentZoom, scale / currentZoom, x, y);
+
+        currentZoom = scale;
+    }
+
+    //region touchevents
+
     //Handle touch events
     public boolean onTouch(BasicInput event) {
         float newDist;
@@ -191,4 +270,26 @@ public class MapViewCamera {
         }
         return true;
     }
+
+    //endregion
+
+    //region getset
+
+    public LocationUser getUser() {
+        return user;
+    }
+
+    public void setUser(LocationUser user) {
+        this.user = user;
+    }
+
+    public MapView getMapView() {
+        return mapView;
+    }
+
+    public void setMapView(MapView mapView) {
+        this.mapView = mapView;
+    }
+
+    //endregion
 }
