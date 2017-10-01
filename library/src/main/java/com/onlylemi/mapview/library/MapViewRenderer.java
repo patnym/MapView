@@ -11,15 +11,19 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
+import com.onlylemi.mapview.library.camera.MapViewCamera;
 import com.onlylemi.mapview.library.graphics.IBackground;
 import com.onlylemi.mapview.library.graphics.implementation.Backgrounds.ColorBackground;
 import com.onlylemi.mapview.library.layer.MapBaseLayer;
+import com.onlylemi.mapview.library.utils.BasicInput;
 import com.onlylemi.mapview.library.utils.MapMath;
 import com.onlylemi.mapview.library.utils.MapRenderTimer;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -30,6 +34,7 @@ import java.util.Objects;
 public class MapViewRenderer extends Thread {
     private static final String TAG = "MapViewRenderer";
 
+    private MapViewCamera camera;
     private Matrix worldMatrix = new Matrix();
     private float zoom = 1.0f;
 
@@ -43,6 +48,10 @@ public class MapViewRenderer extends Thread {
 
     private Object pauseLock = new Object();
     private boolean paused = false;
+
+    //// TODO: 10/1/17 This could be optimized, this could stress the GC
+    private boolean handleInput = false; //gets flagged if there is input to handle
+    private List<BasicInput> inputQueue;
 
     private Handler messageHandler;
 
@@ -69,11 +78,13 @@ public class MapViewRenderer extends Thread {
         //Default background is black
         background = new ColorBackground(Color.BLACK);
         layers = mapView.getLayers();
+        camera = new MapViewCamera();
 
+        inputQueue = new ArrayList<>();
     }
 
     public void onSurfaceChanged(SurfaceHolder holder, float width, float height) {
-
+        camera.onSurfaceChanged(width, height);
     }
 
     @Override
@@ -91,6 +102,12 @@ public class MapViewRenderer extends Thread {
                     doFrame((((long) msg.arg1) << 32) |
                             (((long) msg.arg2) & 0xffffffffL));
                 }
+//                else if(msg.what == 2) {
+//                    MotionEvent event = (MotionEvent) msg.obj;
+//                    camera.onTouch(event);
+//                } else {
+//                    Log.v(TAG, "Got a bogus message");
+//                }
             }
         };
 
@@ -135,14 +152,16 @@ public class MapViewRenderer extends Thread {
         background.draw(canvas);
 
         //// TODO: 2017-08-14 This will be a seperate controller later on
-        mapView.updateModes(deltaTimeNano);
+        //mapView.updateModes(deltaTimeNano);
+
+        Matrix m = camera.update(deltaTimeNano);
 
         for (MapBaseLayer layer : layers) {
             if (layer.isVisible) {
-                layer.draw(canvas, worldMatrix, zoom, deltaTimeNano);
+                layer.draw(canvas, m, zoom, deltaTimeNano);
 
                 if (debug) {
-                    layer.debugDraw(canvas, worldMatrix);
+                    layer.debugDraw(canvas, m);
                 }
             }
         }
@@ -157,6 +176,7 @@ public class MapViewRenderer extends Thread {
             rootHolder.unlockCanvasAndPost(canvas);
         }
 
+        handleInputQueue();
 
         canvas = null;
     }
@@ -183,6 +203,28 @@ public class MapViewRenderer extends Thread {
             }
         }
     }
+
+    public void queueInput(MotionEvent event) {
+        synchronized (inputQueue) {
+            inputQueue.add(new BasicInput(event));
+        }
+    }
+
+    //Called each frame to handle any potential input
+    public void handleInputQueue() {
+        synchronized (inputQueue) {
+            for (BasicInput event : inputQueue) {
+                camera.onTouch(event);
+
+//                for (MapBaseLayer layer : layers) {
+//                    layer.onTouch(event);
+//                }
+            }
+            inputQueue.clear();
+        }
+    }
+
+    //region getset
 
     public void setDebug(boolean enableDebug) {
         debug = enableDebug;
@@ -215,6 +257,8 @@ public class MapViewRenderer extends Thread {
     public void setBackground(IBackground background) {
         this.background = background;
     }
+
+    //endregion
 
     private void drawDebugValues(Canvas canvas, long deltaTimeNano) {
         frameTimeAccumilator += deltaTimeNano;
