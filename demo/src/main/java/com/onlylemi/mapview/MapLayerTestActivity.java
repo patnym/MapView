@@ -7,6 +7,7 @@ import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.graphics.Shader;
 import android.graphics.drawable.ColorDrawable;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,10 +15,13 @@ import android.view.Choreographer;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.LinearLayout;
 
 import com.onlylemi.mapview.library.MapView;
 import com.onlylemi.mapview.library.MapViewListener;
+import com.onlylemi.mapview.library.camera.MapViewCamera;
 import com.onlylemi.mapview.library.graphics.BaseGraphics;
 import com.onlylemi.mapview.library.graphics.BaseMark;
 import com.onlylemi.mapview.library.graphics.implementation.Backgrounds.ColorBackground;
@@ -40,6 +44,8 @@ import java.util.List;
 public class MapLayerTestActivity extends AppCompatActivity {
 
     private static final String TAG = "MapLayerTestActivity";
+
+    private LinearLayout mapContainerLayout;
 
     private MapView mapView;
 
@@ -64,6 +70,8 @@ public class MapLayerTestActivity extends AppCompatActivity {
         float refreshRating = display.getRefreshRate();
 
         Log.d(TAG, "Refreshrate is: " + refreshRating);
+
+        mapContainerLayout = (LinearLayout) findViewById(R.id.mapcontainer);
 
         try {
             // TODO: 2017-02-22 get from net
@@ -121,6 +129,7 @@ public class MapLayerTestActivity extends AppCompatActivity {
                 mapView.addLayer(markLayer);
                 mapView.addLayer(routeLayer);
                 mapView.setDebug(true);
+                mapView.setTrackingMode(MapView.TRACKING_MODE.CONTAIN_USER);
             }
 
             @Override
@@ -181,45 +190,25 @@ public class MapLayerTestActivity extends AppCompatActivity {
             }
 
             if (keyCode == KeyEvent.KEYCODE_K) {
-
+                mapView.getCamera().changeMode(MapViewCamera.CameraMode.CONTAIN_USER);
 //                View v = findViewById(R.id.mappi);
 //                v.setVisibility(View.GONE);
-                    mapView.pauseRendering();
+//                    mapView.pauseRendering();
 //                markLayer.setStaticMarks(new ArrayList<BaseMark>());
 //                markLayer.setProximityMarks(new ArrayList<ProximityMark>());
 
             }
 
             if(keyCode == KeyEvent.KEYCODE_G) {
-                mapView.disableFixedFPS();
-            }
-
-            if(keyCode == KeyEvent.KEYCODE_T) {
-                mapView.setFixedFPS(5);
+                ViewGroup.LayoutParams param = mapContainerLayout.getLayoutParams();
+                param.width = 350;
+                mapContainerLayout.setLayoutParams(param);
             }
 
             if (keyCode == KeyEvent.KEYCODE_P) {
-//                View v = findViewById(R.id.mappi);
-//                v.setVisibility(View.VISIBLE);
-                mapView.resumeRendering();
-//                try {
-//                    Bitmap markBm = BitmapFactory.decodeStream(getAssets().open("marker.png"));
-//
-//                    bs.add(new ProximityMark(markBm, TestData.getMarks().get(index), markBm.getHeight() * 2, true, false));
-//                    sm.add(new StaticMark(markBm, TestData.getMarks().get(index)));
-//                    markLayer.setProximityMarks(bs);
-//                    markLayer.setStaticMarks(sm);
-//                    route.add(TestData.getMarks().get(index));
-//                    routeLayer.setRouteList(route);
-//
-//                    index++;
-//
-//                    mapView.setZoomPoints(bs, 5.0f, true);
-//
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-
+                ViewGroup.LayoutParams param = mapContainerLayout.getLayoutParams();
+                param.width = ViewGroup.LayoutParams.MATCH_PARENT;
+                mapContainerLayout.setLayoutParams(param);
             }
 
             //If continious is true it will keep the mark array as a reference
