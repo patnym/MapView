@@ -286,11 +286,11 @@ public class MapView extends SurfaceView implements SurfaceHolder.Callback, Chor
                 }
                 break;
             case MotionEvent.ACTION_UP:
-                if (withFloorPlan(event.getX(), event.getY())) {
-                    for (MapBaseLayer layer : layers) {
-                        layer.onTouch(event);
-                    }
+//                if (withFloorPlan(event.getX(), event.getY())) {
+                for (MapBaseLayer layer : layers) {
+                    layer.onTouch(event);
                 }
+//                }
                 currentTouchState = MapView.TOUCH_STATE_NO;
                 break;
             case MotionEvent.ACTION_POINTER_UP:
