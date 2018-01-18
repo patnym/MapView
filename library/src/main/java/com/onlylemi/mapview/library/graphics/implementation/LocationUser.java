@@ -156,7 +156,6 @@ public class LocationUser extends BaseGraphics {
 
         //If we input a single position and there isnt git anything to add on we use regular move
         if(destinationsLifo.size() == 1 && !appendToOldList && moveToDestinations.isEmpty()) {
-            Log.v(TAG, "Input single element position, calling regular move");
             move(destinationsLifo.get(0), duration);
             return;
         }
