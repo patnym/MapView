@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.graphics.PointF;
 import android.os.Message;
 import android.util.AttributeSet;
@@ -17,6 +18,7 @@ import android.view.View;
 import com.onlylemi.mapview.library.graphics.BaseGraphics;
 import com.onlylemi.mapview.library.graphics.IBackground;
 import com.onlylemi.mapview.library.graphics.implementation.LocationUser;
+import com.onlylemi.mapview.library.layer.EmptyMapLayer;
 import com.onlylemi.mapview.library.layer.MapBaseLayer;
 import com.onlylemi.mapview.library.layer.MapLayer;
 import com.onlylemi.mapview.library.utils.MapMath;
@@ -168,6 +170,7 @@ public class MapView extends SurfaceView implements SurfaceHolder.Callback, Chor
 
         calculateOnContainUserZoom();
 
+        mapLayer.initMapLayer();
         thread.onSurfaceChanged(holder, width, height);
     }
 
@@ -189,11 +192,17 @@ public class MapView extends SurfaceView implements SurfaceHolder.Callback, Chor
     }
 
     private void onRenderingStarted() {
+        thread.waitUntilReady();
+
+        //If any layer has been added before this we create their handlers
+        for (MapBaseLayer layer : layers) {
+            layer.createHandler(thread);
+        }
+
         calculateOnContainUserZoom();
         if(mapViewListener != null) {
             mapViewListener.onRenderingStarted(getWidth(), getHeight());
         }
-        thread.waitUntilReady();
         Choreographer.getInstance().postFrameCallback(this);
     }
 
@@ -229,6 +238,24 @@ public class MapView extends SurfaceView implements SurfaceHolder.Callback, Chor
         }).start();
     }
 
+    /**
+     * This creates an empty canavas to draw your own map on
+     * Will not trigger the failed maploading listener as we are not loading anything
+     * Triggers the loadSuccess to for consistency
+     * @param width
+     * @param height
+     */
+    public void createMap(int width, int height) {
+        if(mapLayer == null) {
+            mapLayer = new EmptyMapLayer(this, width, height);
+            layers.add(mapLayer);
+        }
+        if(mapViewListener != null) {
+            mapViewListener.onMapLoadSuccess();
+        }
+        isMapLoadFinish = true;
+    }
+
     private TRACKING_MODE oldMode;
 
     @Override
@@ -259,11 +286,11 @@ public class MapView extends SurfaceView implements SurfaceHolder.Callback, Chor
                 }
                 break;
             case MotionEvent.ACTION_UP:
-                if (withFloorPlan(event.getX(), event.getY())) {
-                    for (MapBaseLayer layer : layers) {
-                        layer.onTouch(event);
-                    }
+//                if (withFloorPlan(event.getX(), event.getY())) {
+                for (MapBaseLayer layer : layers) {
+                    layer.onTouch(event);
                 }
+//                }
                 currentTouchState = MapView.TOUCH_STATE_NO;
                 break;
             case MotionEvent.ACTION_POINTER_UP:
@@ -503,12 +530,12 @@ public class MapView extends SurfaceView implements SurfaceHolder.Callback, Chor
                 PointF dir = new PointF();
                 dir.x = desti.x / distance;
                 dir.y = desti.y / distance;
-                distance -= modeOptions.translationsPixelsPerNanoSecond * deltaTime;
+                distance -= modeOptions.getTranslationsPixelsPerSecond() * deltaTime;
 
                 if (distance <= 0.0f) {
                     currentMatrix.postTranslate(desti.x, desti.y);
                 } else {
-                    currentMatrix.postTranslate(dir.x * modeOptions.translationsPixelsPerNanoSecond * deltaTime, dir.y * modeOptions.translationsPixelsPerNanoSecond * deltaTime);
+                    currentMatrix.postTranslate(dir.x * modeOptions.getTranslationsPixelsPerSecond() * deltaTime, dir.y * modeOptions.getTranslationsPixelsPerSecond() * deltaTime);
                 }
 
                 thread.setWorldMatrix(currentMatrix);
@@ -560,6 +587,11 @@ public class MapView extends SurfaceView implements SurfaceHolder.Callback, Chor
      */
     public void addLayer(MapBaseLayer layer) {
         if (layer != null) {
+
+            if(thread != null && thread.getHandler() != null) {
+                layer.createHandler(thread);
+            }
+
             layers.add(layer);
         }
     }
@@ -798,16 +830,16 @@ public class MapView extends SurfaceView implements SurfaceHolder.Callback, Chor
      */
     public boolean withFloorPlan(float x, float y) {
         float[] goal = convertMapXYToScreenXY(x, y);
-        return goal[0] > 0 && goal[0] < mapLayer.getImage().getWidth() && goal[1] > 0
-                && goal[1] < mapLayer.getImage().getHeight();
+        return goal[0] > 0 && goal[0] < mapLayer.getDimensions().width() && goal[1] > 0
+                && goal[1] < mapLayer.getDimensions().height();
     }
 
     public float getMapWidth() {
-        return mapLayer.getImage().getWidth();
+        return mapLayer.getDimensions().width();
     }
 
     public float getMapHeight() {
-        return mapLayer.getImage().getHeight();
+        return mapLayer.getDimensions().height();
     }
 
     public int getCanvasBackgroundColor() {
