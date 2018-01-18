@@ -154,7 +154,8 @@ public class LocationUser extends BaseGraphics {
             throw new IllegalArgumentException("Destination list size = 0. Please include at least 1 element");
         }
 
-        if(destinationsLifo.size() < 1) {
+        //If we input a single position and there isnt git anything to add on we use regular move
+        if(destinationsLifo.size() == 1 && !appendToOldList && moveToDestinations.isEmpty()) {
             Log.v(TAG, "Input single element position, calling regular move");
             move(destinationsLifo.get(0), duration);
             return;
@@ -183,6 +184,13 @@ public class LocationUser extends BaseGraphics {
             distances[i] = new PointF(moveToDestinations.get(i).x - moveToDestinations.get(i-1).x, moveToDestinations.get(i).y - moveToDestinations.get(i-1).y).length();
             totalDistance += distances[i];
         }
+
+        //If user the total distance equals 0 the user most likely input a list of the same positions
+        if(totalDistance == 0.0f) {
+            Log.w(TAG, "Total distance to traverse is 0, will not move user");
+            return;
+        }
+
         translationAnims.add(new TranslationAnimation(this, moveToDestinations.get(0), distances[0] / totalDistance * duration, bmp.getWidth() / 2, bmp.getHeight() / 2));
         for(int i = 1; i < moveToDestinations.size(); i++) {
             translationAnims.add(new TranslationAnimation(this, moveToDestinations.get(i-1), moveToDestinations.get(i), distances[i] / totalDistance * duration, bmp.getWidth() / 2, bmp.getHeight() / 2));
