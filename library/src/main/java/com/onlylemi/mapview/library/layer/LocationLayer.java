@@ -66,6 +66,7 @@ public class LocationLayer extends MapBaseLayer {
         if (isVisible) {
             user.draw(canvas, locationPaint);
         }
+        super.draw(canvas, currentMatrix, currentZoom, deltaTime);
     }
 
     @Override
