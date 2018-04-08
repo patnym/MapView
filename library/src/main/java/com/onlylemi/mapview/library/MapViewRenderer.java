@@ -4,17 +4,17 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.PointF;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.view.Choreographer;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
-import android.view.View;
 
+import com.onlylemi.mapview.library.camera.MapViewCamera;
 import com.onlylemi.mapview.library.graphics.IBackground;
 import com.onlylemi.mapview.library.graphics.implementation.Backgrounds.ColorBackground;
 import com.onlylemi.mapview.library.graphics.implementation.LocationUser;
@@ -46,7 +46,7 @@ public class MapViewRenderer extends Thread {
     private MapRenderTimer frameTimer = new MapRenderTimer();
     private Surface root;
     private SurfaceHolder rootHolder;
-    private MapView mapView;
+    protected MapView mapView;
     private boolean running = false;
     private MapLayer rootLayer;
     private List<MapBaseLayer> layers;
@@ -65,11 +65,20 @@ public class MapViewRenderer extends Thread {
 
     private boolean isSetupDone = false;
 
+    //If true, draw every frame regardless of changes
+    volatile boolean forceContinousRendering = false;
+
+    private boolean isFrameRequested = false;
+    //Flagged true if the draw loop is currently running
+    private boolean rendering = false;
+    private Object renderStateLock = new Object();
+
     //All values below are cached to prevent GC
     //region cache
 
     private MotionEventMessage cachedMotionEvent;
     private int cachedMotionEventAction;
+    private Matrix cachedMatrix;
 
     //endregion cache
 
@@ -97,6 +106,7 @@ public class MapViewRenderer extends Thread {
         background = new ColorBackground(Color.RED);
         //layers = mapView.getLayers();
         layers = new ArrayList<>();
+        cachedMatrix = new Matrix();
     }
 
     public void onSurfaceChanged(int width, int height) {
@@ -108,7 +118,7 @@ public class MapViewRenderer extends Thread {
     public void run() {
 
         /*
-            This locks the render thread until the user sets up the setup callback
+         *   This locks the render thread until the user sets up the setup callback
          */
         synchronized (setupLock) {
             while(setupCallback == null) {
@@ -129,14 +139,16 @@ public class MapViewRenderer extends Thread {
         messageHandler = new MapViewMessageHandler();
 
         //// TODO: 27/12/2017 Maybe rename to setup handler?
-        MapViewHandler setupHandler = new MapViewHandler(this.mapView, this);
+        MapViewSetupHandler setupHandler = new MapViewSetupHandler(this.mapView, this);
         setupCallback.onSetup(setupHandler);
         finishSetup(setupHandler.getUser());
         setupCallback.onPostSetup();
 
         Log.d(TAG, "Setup callback finished");
 
-        Log.d(TAG, "Everything setup, starting looper");
+        wakeUp();
+
+        Log.d(TAG, "Rendering started, starting looper");
 
         Looper.loop();
 
@@ -151,14 +163,37 @@ public class MapViewRenderer extends Thread {
 
     private long oldTimeStamp;
     public void doFrame(long timeStamp) {
+        isFrameRequested = false;
 
         if((System.nanoTime() - timeStamp) / 1000000 > 15) {
+            requestFrame();
             return;
         }
 
         long deltaTimeNano = timeStamp - oldTimeStamp;
         oldTimeStamp = timeStamp;
 
+
+        boolean hasUpdated = false;
+        Matrix m = camera.update(deltaTimeNano);
+
+        if(!m.equals(cachedMatrix)) {
+            cachedMatrix.set(m);
+            hasUpdated = true;
+        }
+
+        for(int i = 0; i < layers.size(); i++) {
+            hasUpdated = (layers.get(i).update(cachedMatrix, deltaTimeNano) || hasUpdated);
+        }
+
+        if(hasUpdated || forceContinousRendering) {
+            draw(deltaTimeNano);
+        }
+
+        requestFrame();
+    }
+
+    private void draw(long deltaTimeNano) {
         //Lock for painting
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
             canvas = root.lockHardwareCanvas();
@@ -172,15 +207,13 @@ public class MapViewRenderer extends Thread {
             return;
 
         background.draw(canvas);
-        
-        Matrix m = camera.update(deltaTimeNano);
 
-        for (MapBaseLayer layer : layers) {
-            if (layer.isVisible) {
-                layer.draw(canvas, m, camera.getCurrentZoom(), deltaTimeNano);
+        for(int i = 0; i < layers.size(); i++) {
+            if(layers.get(i).isVisible) {
+                layers.get(i).draw(canvas, cachedMatrix, camera.getCurrentZoom(), deltaTimeNano);
 
-                if (debug) {
-                    layer.debugDraw(canvas, m);
+                if(debug) {
+                    layers.get(i).debugDraw(canvas, cachedMatrix);
                 }
             }
         }
@@ -195,8 +228,17 @@ public class MapViewRenderer extends Thread {
             rootHolder.unlockCanvasAndPost(canvas);
         }
 
-
         canvas = null;
+    }
+
+    /**
+     * Requests to render next frame, this will in turn call doFrame()
+     */
+    private void requestFrame() {
+        if(!isFrameRequested) {
+            isFrameRequested = true;
+            Choreographer.getInstance().postFrameCallback(mapView);
+        }
     }
 
     /**
@@ -299,6 +341,10 @@ public class MapViewRenderer extends Thread {
         return isSetupDone;
     }
 
+    public boolean isRendering() {
+        return rendering;
+    }
+
     @Deprecated
     public IBackground getBackground() {
         return background;
@@ -307,6 +353,34 @@ public class MapViewRenderer extends Thread {
     @Deprecated
     public void setBackground(IBackground background) {
         this.background = background;
+    }
+
+    /**
+     * If called we attempt to wake up the render part of the thread
+     */
+    public void wakeUp() {
+        if(rendering) {
+            return;
+        }
+        requestFrame();
+        synchronized (renderStateLock) {
+            rendering = true;
+        }
+    }
+
+    /**
+     * If called we attempt to pause the rendering side of this thread
+     * NOTE! This does not stop the Thread handler from running
+     * @return
+     */
+    public void pause() {
+        if(!rendering) {
+            return;
+        }
+        Choreographer.getInstance().removeFrameCallback(mapView);
+        synchronized (renderStateLock) {
+            rendering = false;
+        }
     }
 
     public MapViewCamera getCamera() {
@@ -347,32 +421,38 @@ public class MapViewRenderer extends Thread {
         {
             switch (msg.what) {
                 case MessageDefenitions.MESSAGE_DRAW:
-                    doFrame((((long) msg.arg1) << 32) |
-                            (((long) msg.arg2) & 0xffffffffL));
-                    break;
-                case MessageDefenitions.MESSAGE_CAMERA_MODE_EXECUTE:
-                    ((ICameraModeCommand) msg.obj).execute(camera);
-                    break;
-                case MessageDefenitions.MESSAGE_EXECUTE:
-                    ((ICommand) msg.obj).execute();
-                    break;
-                case MessageDefenitions.MESSAGE_MOTIONEVENT:
-                    cachedMotionEvent = (MotionEventMessage) msg.obj;
-                    cachedMotionEventAction = cachedMotionEvent.getAction() & MotionEvent.ACTION_MASK;
-
-                    feedInputToCamera(cachedMotionEventAction, cachedMotionEvent);
-
-                    //If this is a click event feed it to layers
-                    if(cachedMotionEventAction == MotionEvent.ACTION_UP) {
-                        feedInputToLayers(cachedMotionEvent.getX(), cachedMotionEvent.getY());
+                    if(rendering) {
+                        doFrame((((long) msg.arg1) << 32) |
+                                (((long) msg.arg2) & 0xffffffffL));
                     }
                     break;
-                case MessageDefenitions.MESSAGE_SURFACE_CHANGED:
-                    onSurfaceChanged(msg.arg1, msg.arg2);
-                    break;
-                case MessageDefenitions.MESSAGE_EXIT_THREAD:
-                    onDestroy();
-                    break;
+                default:
+                    switch (msg.what) {
+                        case MessageDefenitions.MESSAGE_CAMERA_MODE_EXECUTE:
+                            ((ICameraModeCommand) msg.obj).execute(camera);
+                            break;
+                        case MessageDefenitions.MESSAGE_EXECUTE:
+                            ((ICommand) msg.obj).execute();
+                            break;
+                        case MessageDefenitions.MESSAGE_MOTIONEVENT:
+                            cachedMotionEvent = (MotionEventMessage) msg.obj;
+                            cachedMotionEventAction = cachedMotionEvent.getAction() & MotionEvent.ACTION_MASK;
+
+                            feedInputToCamera(cachedMotionEventAction, cachedMotionEvent);
+
+                            //If this is a click event feed it to layers
+                            if(cachedMotionEventAction == MotionEvent.ACTION_UP) {
+                                feedInputToLayers(cachedMotionEvent.getX(), cachedMotionEvent.getY());
+                            }
+                            break;
+                        case MessageDefenitions.MESSAGE_SURFACE_CHANGED:
+                            onSurfaceChanged(msg.arg1, msg.arg2);
+                            break;
+                        case MessageDefenitions.MESSAGE_EXIT_THREAD:
+                            onDestroy();
+                            break;
+                    }
+                    requestFrame();
             }
             super.handleMessage(msg);
         }
