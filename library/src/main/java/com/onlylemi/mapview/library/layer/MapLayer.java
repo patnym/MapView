@@ -56,6 +56,7 @@ public class MapLayer extends MapBaseLayer {
     @Override
     public void draw(Canvas canvas, Matrix currentMatrix, float currentZoom, long deltaTime) {
         canvas.drawBitmap(bmp, currentMatrix, paint);
+        super.draw(canvas, currentMatrix, currentZoom, deltaTime);
     }
 
     @Override

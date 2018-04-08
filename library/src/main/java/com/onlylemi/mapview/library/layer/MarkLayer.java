@@ -105,6 +105,7 @@ public class MarkLayer extends MapBaseLayer {
                 }
             }
         }
+        super.draw(canvas, currentMatrix, currentZoom, deltaTime);
     }
 
     @Override

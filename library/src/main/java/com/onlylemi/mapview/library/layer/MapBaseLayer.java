@@ -47,7 +47,9 @@ public abstract class MapBaseLayer {
      * @param currentZoom
      * @param deltaTime
      */
-    public abstract void draw(Canvas canvas, Matrix currentMatrix, float currentZoom, long deltaTime);
+    public void draw(Canvas canvas, Matrix currentMatrix, float currentZoom, long deltaTime) {
+        hasChanged = false;
+    }
 
     public abstract void debugDraw(Canvas canvas, Matrix currentMatrix);
 
