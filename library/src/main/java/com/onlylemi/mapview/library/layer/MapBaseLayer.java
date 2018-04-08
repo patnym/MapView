@@ -38,6 +38,10 @@ public abstract class MapBaseLayer {
 
     public abstract void onTouch(float x, float y);
 
+    public void onViewChanged(int width, int height) {
+        //no-op
+    }
+
     public abstract boolean update(Matrix currentMatrix, long deltaTime);
     /**
      * draw event

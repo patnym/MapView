@@ -1,7 +1,10 @@
 package com.onlylemi.mapview.library;
 
 import android.graphics.Bitmap;
+import android.graphics.Color;
 
+import com.onlylemi.mapview.library.graphics.IBackground;
+import com.onlylemi.mapview.library.graphics.implementation.Backgrounds.ColorBackground;
 import com.onlylemi.mapview.library.graphics.implementation.LocationUser;
 import com.onlylemi.mapview.library.layer.MapBaseLayer;
 import com.onlylemi.mapview.library.layer.MapLayer;
@@ -22,13 +25,18 @@ public class MapViewSetupHandler {
         this.renderer = renderer;
     }
 
+
+    public void createMap(Bitmap bmp) {
+        createMap(bmp, new ColorBackground(Color.BLACK));
+    }
+
     /**
      * Creates a map from a bitmap
-     * @param bmp
+     * @param bmp - map image
+     * @param background
      */
-    public void createMap(Bitmap bmp) {
-        MapLayer mapLayer = new MapLayer(view);
-        mapLayer.setBmp(bmp);
+    public void createMap(Bitmap bmp, IBackground background) {
+        MapLayer mapLayer = new MapLayer(view, bmp, background);
         addLayer(mapLayer);
         renderer.setMapLayer(mapLayer);
     }

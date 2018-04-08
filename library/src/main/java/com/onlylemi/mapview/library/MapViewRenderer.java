@@ -50,7 +50,6 @@ public class MapViewRenderer extends Thread {
     private boolean running = false;
     private MapLayer rootLayer;
     private List<MapBaseLayer> layers;
-    private IBackground background;
 
     private MapViewCamera camera;
 
@@ -88,7 +87,6 @@ public class MapViewRenderer extends Thread {
     private int frameCounter = 0;
     private long frameTimeAccumilator = 0;
     private int FPS = 0;
-    private int droppedFrames = 0;
 
     //endregion
 
@@ -103,15 +101,16 @@ public class MapViewRenderer extends Thread {
         this.rootHolder = root;
         this.mapView = mapView;
         //Default background is black
-        background = new ColorBackground(Color.RED);
         //layers = mapView.getLayers();
         layers = new ArrayList<>();
         cachedMatrix = new Matrix();
     }
 
     public void onSurfaceChanged(int width, int height) {
-        this.background.onSurfaceChanged(width, height);
         this.camera.onViewChanged(width, height);
+        for(MapBaseLayer layer : layers) {
+            layer.onViewChanged(width, height);
+        }
     }
 
     @Override
@@ -205,8 +204,6 @@ public class MapViewRenderer extends Thread {
         //Means somthing managed to remove the canvas before we locked it
         if(canvas == null)
             return;
-
-        background.draw(canvas);
 
         for(int i = 0; i < layers.size(); i++) {
             if(layers.get(i).isVisible) {
@@ -345,16 +342,6 @@ public class MapViewRenderer extends Thread {
         return rendering;
     }
 
-    @Deprecated
-    public IBackground getBackground() {
-        return background;
-    }
-
-    @Deprecated
-    public void setBackground(IBackground background) {
-        this.background = background;
-    }
-
     /**
      * If called we attempt to wake up the render part of the thread
      */
@@ -408,6 +395,7 @@ public class MapViewRenderer extends Thread {
             p.setColor(Color.YELLOW);
             canvas.drawText("FPS: " + FPS, 10, 80, p);
             canvas.drawText("Hardware accelerated: " + canvas.isHardwareAccelerated(), 10, 120, p);
+            canvas.drawText("Continuous rendering: " + forceContinousRendering, 10, 160, p);
         }
     }
 
