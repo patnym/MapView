@@ -42,6 +42,7 @@ public class MapViewCamera {
     //Default values
     private final float maxZoomPaddingFactor = 2.0f;
     private final float minZoomPaddingFactor = 0.5f;
+    private float containUserZoomFactor = 1.0f;
 
     private float maxZoom;
     private float minZoom;
@@ -185,6 +186,9 @@ public class MapViewCamera {
         setMinZoomFactor(minZoomPaddingFactor);
         setMaxZoomFactor(maxZoomPaddingFactor);
 
+        //Important this runs AFTER setting the zoom paddings
+        setDefaultContainUserZoomFactor(containUserZoomFactor);
+
         //Notify the factory of our default contain zoom
         factory.setDefaultContainUserZoom(defaultContainUserZoom);
 
@@ -281,6 +285,10 @@ public class MapViewCamera {
 
     public void setMinZoomFactor(float minFactor) {
         minZoom = MapMath.min(defaultContainUserZoom * minFactor, defaultContainUserZoom);
+    }
+
+    public void setDefaultContainUserZoomFactor(float factor) {
+        defaultContainUserZoom *= factor;
     }
 
     public float getDefaultContainUserZoom() {

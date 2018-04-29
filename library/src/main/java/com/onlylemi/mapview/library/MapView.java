@@ -3,6 +3,7 @@ package com.onlylemi.mapview.library;
 import android.content.Context;
 import android.graphics.PointF;
 import android.os.Message;
+import android.support.annotation.FloatRange;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Choreographer;
@@ -280,7 +281,10 @@ public class MapView extends SurfaceView implements SurfaceHolder.Callback, Chor
      * maxZoom = default zoom * factor
      * @param maxFactor
      */
-    public void setCameraMaxZoomFactor(final float maxFactor) {
+    public void setCameraMaxZoomFactor(@FloatRange(from = 0.0, to = Float.MAX_VALUE)
+                                       final float maxFactor) {
+        verifyFactorValue(maxFactor);
+
         if(maxFactor < 1) {
             Log.w(TAG, "Warning, max factor should be >= 1" +
                         ". A factor < 1 can generate unwanted behaviour");
@@ -300,7 +304,10 @@ public class MapView extends SurfaceView implements SurfaceHolder.Callback, Chor
      * minZoom = default zoom * factor
      * @param minFactor
      */
-    public void setCameraMinZoomFactor(final float minFactor) {
+    public void setCameraMinZoomFactor(@FloatRange(from = 0.0, to = Float.MAX_VALUE)
+                                       final float minFactor) {
+        verifyFactorValue(minFactor);
+
         if(minFactor > 1) {
             Log.w(TAG, "Warning, min factor should be <= 1" +
                     ". A factor > 1 can generate unwanted behaviour");
@@ -312,6 +319,29 @@ public class MapView extends SurfaceView implements SurfaceHolder.Callback, Chor
                 camera.setMinZoomFactor(minFactor);
             }
         });
+    }
+
+    /**
+     * Sets the default zoom level used when
+     * running the contain user camera mode
+     * @param factor
+     */
+    public void setDefaultContainUserZoomFactor(@FloatRange(from = 0.0, to = Float.MAX_VALUE)
+                                                final float factor) {
+        verifyFactorValue(factor);
+
+        sendCameraMessageToThread(new ICameraModeCommand() {
+            @Override
+            public void execute(MapViewCamera camera) {
+                camera.setDefaultContainUserZoomFactor(factor);
+            }
+        });
+    }
+
+    private void verifyFactorValue(float factor) throws RuntimeException {
+        if(factor < 0) {
+            throw new RuntimeException("Zoom factor cannot be negative, all values must be > 0");
+        }
     }
 
     private void sendCameraMessageToThread(ICameraModeCommand command) {
