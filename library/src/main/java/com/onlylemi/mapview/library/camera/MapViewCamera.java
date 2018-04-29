@@ -39,8 +39,9 @@ public class MapViewCamera {
     private int mapHeight;
 
     //These are zoom paddings - Multiples, aka 2 = you can zoom in twice the size of the original
-    private float maxZoomPaddingFactor = 2.0f;
-    private float minZoomPaddingFactor = 0.5f;
+    //Default values
+    private final float maxZoomPaddingFactor = 2.0f;
+    private final float minZoomPaddingFactor = 0.5f;
 
     private float maxZoom;
     private float minZoom;
@@ -181,8 +182,8 @@ public class MapViewCamera {
         }
 
         defaultContainUserZoom = MapMath.max(widthRatio, heightRatio);
-        minZoom = MapMath.min(currentZoom - (currentZoom * minZoomPaddingFactor), defaultContainUserZoom);
-        maxZoom = MapMath.max(currentZoom * maxZoomPaddingFactor, defaultContainUserZoom);
+        setMinZoomFactor(minZoomPaddingFactor);
+        setMaxZoomFactor(maxZoomPaddingFactor);
 
         //Notify the factory of our default contain zoom
         factory.setDefaultContainUserZoom(defaultContainUserZoom);
@@ -204,9 +205,9 @@ public class MapViewCamera {
     }
 
     public void zoom(float zoom, float worldX, float worldY) {
-        //float newZoom = MapMath.truncateNumber(zoom, minZoom, maxZoom);
-        worldMatrix.postScale(zoom / currentZoom, zoom / currentZoom, worldX, worldY);
-        currentZoom = zoom;
+        float newZoom = MapMath.truncateNumber(zoom, minZoom, maxZoom);
+        worldMatrix.postScale(newZoom / currentZoom, newZoom / currentZoom, worldX, worldY);
+        currentZoom = newZoom;
     }
 
     /**
@@ -274,12 +275,12 @@ public class MapViewCamera {
         return minZoom;
     }
 
-    public void setMaxZoom(float maxZoom) {
-        this.maxZoom = maxZoom;
+    public void setMaxZoomFactor(float maxFactor) {
+        maxZoom = MapMath.max(defaultContainUserZoom * maxFactor, defaultContainUserZoom);
     }
 
-    public void setMinZoom(float minZoom) {
-        this.minZoom = minZoom;
+    public void setMinZoomFactor(float minFactor) {
+        minZoom = MapMath.min(defaultContainUserZoom * minFactor, defaultContainUserZoom);
     }
 
     public float getDefaultContainUserZoom() {

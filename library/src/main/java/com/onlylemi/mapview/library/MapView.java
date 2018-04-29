@@ -262,12 +262,54 @@ public class MapView extends SurfaceView implements SurfaceHolder.Callback, Chor
         thread.forceContinousRendering = enable;
     }
 
+    //region Camera
+
     public void setCameraDefaultRevertDuration(float durationMS) {
         final long durationNano = (long) durationMS * 1000000;
         sendCameraMessageToThread(new ICameraModeCommand() {
             @Override
             public void execute(MapViewCamera camera) {
                 camera.setDefaultRevertDuration(durationNano);
+            }
+        });
+    }
+
+    /**
+     * Sets the max zoom factor.
+     * Calculations are based on the default zoom.
+     * maxZoom = default zoom * factor
+     * @param maxFactor
+     */
+    public void setCameraMaxZoomFactor(final float maxFactor) {
+        if(maxFactor < 1) {
+            Log.w(TAG, "Warning, max factor should be >= 1" +
+                        ". A factor < 1 can generate unwanted behaviour");
+        }
+
+        sendCameraMessageToThread(new ICameraModeCommand() {
+            @Override
+            public void execute(MapViewCamera camera) {
+                camera.setMaxZoomFactor(maxFactor);
+            }
+        });
+    }
+
+    /**
+     * Sets the min zoom factor.
+     * Calculations are based on the default zoom.
+     * minZoom = default zoom * factor
+     * @param minFactor
+     */
+    public void setCameraMinZoomFactor(final float minFactor) {
+        if(minFactor > 1) {
+            Log.w(TAG, "Warning, min factor should be <= 1" +
+                    ". A factor > 1 can generate unwanted behaviour");
+        }
+
+        sendCameraMessageToThread(new ICameraModeCommand() {
+            @Override
+            public void execute(MapViewCamera camera) {
+                camera.setMinZoomFactor(minFactor);
             }
         });
     }
@@ -279,6 +321,8 @@ public class MapView extends SurfaceView implements SurfaceHolder.Callback, Chor
             Log.w(TAG, "Trying to call a handler method before the thread has finished setup");
         }
     }
+
+    //endregion
 
     @Deprecated
     public void disableFixedFPS() {
