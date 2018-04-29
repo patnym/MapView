@@ -37,6 +37,8 @@ public class MapView extends SurfaceView implements SurfaceHolder.Callback, Chor
     private List<MapBaseLayer> layers; // all layers
     private MapLayer mapLayer;
 
+    private boolean hardStopOnVisibilityChanged = false;
+
     //Main rendering thread
     private MapViewRenderer thread; // = new MapViewRenderer();
 
@@ -93,10 +95,11 @@ public class MapView extends SurfaceView implements SurfaceHolder.Callback, Chor
 
     /**
      * Resumes the rendering thread
+     * @param hard - If true we stop the entire update loop, otherwise only drawing stops
      */
-    public void pauseRendering() {
+    public void pauseRendering(boolean hard) {
         if(thread != null) {
-            thread.pause();
+            thread.pause(false);
         }
     }
 
@@ -105,7 +108,7 @@ public class MapView extends SurfaceView implements SurfaceHolder.Callback, Chor
         super.onVisibilityChanged(changedView, state);
 
         if ((state == View.GONE || state == View.INVISIBLE)) {
-            pauseRendering();
+            pauseRendering(hardStopOnVisibilityChanged);
         }else if(state == View.VISIBLE) {
             resumeRendering();
         }
@@ -359,6 +362,10 @@ public class MapView extends SurfaceView implements SurfaceHolder.Callback, Chor
 //        if(thread != null) {
 //            thread.disableFixedFrameRate();
 //        }
+    }
+
+    public void setHardStopOnVisibilityChanged(boolean stopOnVisibilityChanged) {
+        hardStopOnVisibilityChanged = stopOnVisibilityChanged;
     }
 
     //region debugging
