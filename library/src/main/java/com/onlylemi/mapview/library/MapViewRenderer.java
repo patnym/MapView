@@ -78,6 +78,7 @@ public class MapViewRenderer extends Thread {
     private MotionEventMessage cachedMotionEvent;
     private int cachedMotionEventAction;
     private Matrix cachedMatrix;
+    boolean hasUpdated = false;
 
     //endregion cache
 
@@ -173,7 +174,7 @@ public class MapViewRenderer extends Thread {
         oldTimeStamp = timeStamp;
 
 
-        boolean hasUpdated = false;
+        //boolean hasUpdated = false;
         Matrix m = camera.update(deltaTimeNano);
 
         if(!m.equals(cachedMatrix)) {
@@ -185,7 +186,7 @@ public class MapViewRenderer extends Thread {
             hasUpdated = (layers.get(i).update(cachedMatrix, deltaTimeNano) || hasUpdated);
         }
 
-        if(hasUpdated || forceContinousRendering) {
+        if(rendering && (hasUpdated || forceContinousRendering)) {
             draw(deltaTimeNano);
         }
 
@@ -224,6 +225,8 @@ public class MapViewRenderer extends Thread {
         }else {
             rootHolder.unlockCanvasAndPost(canvas);
         }
+
+        hasUpdated = false;
 
         canvas = null;
     }
@@ -349,24 +352,30 @@ public class MapViewRenderer extends Thread {
         if(rendering) {
             return;
         }
+        rendering = true;
         requestFrame();
-        synchronized (renderStateLock) {
-            rendering = true;
-        }
+//        synchronized (renderStateLock) {
+//            rendering = true;
+//        }
     }
 
     /**
      * If called we attempt to pause the rendering side of this thread
      * NOTE! This does not stop the Thread handler from running
+     * @hard - if true everything stops except the Looper, this means no update nor rendering
      * @return
      */
-    public void pause() {
+    public void pause(boolean hard) {
         if(!rendering) {
             return;
         }
-        Choreographer.getInstance().removeFrameCallback(mapView);
-        synchronized (renderStateLock) {
-            rendering = false;
+
+        rendering = false;
+
+        if(hard) {
+            Choreographer.getInstance().removeFrameCallback(mapView);
+            //Clear the message queue of render messages to not request another frame
+            messageHandler.removeMessages(MessageDefenitions.MESSAGE_DRAW);
         }
     }
 
@@ -409,10 +418,8 @@ public class MapViewRenderer extends Thread {
         {
             switch (msg.what) {
                 case MessageDefenitions.MESSAGE_DRAW:
-                    if(rendering) {
-                        doFrame((((long) msg.arg1) << 32) |
-                                (((long) msg.arg2) & 0xffffffffL));
-                    }
+                    doFrame((((long) msg.arg1) << 32) |
+                            (((long) msg.arg2) & 0xffffffffL));
                     break;
                 default:
                     switch (msg.what) {
@@ -440,7 +447,6 @@ public class MapViewRenderer extends Thread {
                             onDestroy();
                             break;
                     }
-                    requestFrame();
             }
             super.handleMessage(msg);
         }
