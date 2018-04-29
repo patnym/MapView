@@ -40,8 +40,8 @@ public class MapViewCamera {
 
     //These are zoom paddings - Multiples, aka 2 = you can zoom in twice the size of the original
     //Default values
-    private final float maxZoomPaddingFactor = 2.0f;
-    private final float minZoomPaddingFactor = 0.5f;
+    private float maxZoomPaddingFactor = 2.0f;
+    private float minZoomPaddingFactor = 0.5f;
     private float containUserZoomFactor = 1.0f;
 
     private float maxZoom;
@@ -280,10 +280,12 @@ public class MapViewCamera {
     }
 
     public void setMaxZoomFactor(float maxFactor) {
+        maxZoomPaddingFactor = maxFactor;
         maxZoom = MapMath.max(defaultContainUserZoom * maxFactor, defaultContainUserZoom);
     }
 
     public void setMinZoomFactor(float minFactor) {
+        minZoomPaddingFactor = minFactor;
         minZoom = MapMath.min(defaultContainUserZoom * minFactor, defaultContainUserZoom);
     }
 
