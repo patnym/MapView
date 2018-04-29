@@ -39,8 +39,9 @@ public class MapViewCamera {
     private int mapHeight;
 
     //These are zoom paddings - Multiples, aka 2 = you can zoom in twice the size of the original
-    private float maxZoomPaddingFactor = 2.0f;
-    private float minZoomPaddingFactor = 0.5f;
+    //Default values
+    private final float maxZoomPaddingFactor = 2.0f;
+    private final float minZoomPaddingFactor = 0.5f;
 
     private float maxZoom;
     private float minZoom;
@@ -181,8 +182,8 @@ public class MapViewCamera {
         }
 
         defaultContainUserZoom = MapMath.max(widthRatio, heightRatio);
-        minZoom = MapMath.min(defaultContainUserZoom * minZoomPaddingFactor, defaultContainUserZoom);
-        maxZoom = MapMath.max(defaultContainUserZoom * maxZoomPaddingFactor, defaultContainUserZoom);
+        setMinZoomFactor(minZoomPaddingFactor);
+        setMaxZoomFactor(maxZoomPaddingFactor);
 
         //Notify the factory of our default contain zoom
         factory.setDefaultContainUserZoom(defaultContainUserZoom);
@@ -191,11 +192,6 @@ public class MapViewCamera {
             zoom(zoom, 0, 0);
             translate((viewWidth / 2) - ((mapWidth * currentZoom) / 2), (viewHeight / 2) - ((mapHeight * currentZoom) / 2));
         }
-    }
-
-    private void updateMinMaxZoom(float minFactor, float maxFactor) {
-        minZoom = MapMath.min(defaultContainUserZoom * minFactor, defaultContainUserZoom);
-        maxZoom = MapMath.max(defaultContainUserZoom * maxFactor, defaultContainUserZoom);
     }
 
     public void translate(float x, float y) {
