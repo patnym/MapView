@@ -3,7 +3,7 @@ package com.onlylemi.mapview;
 import android.graphics.Matrix;
 import android.graphics.PointF;
 
-import com.onlylemi.mapview.Mocks.MockUser;
+import com.onlylemi.mapview.mocks.MockUser;
 import com.onlylemi.mapview.library.camera.MapViewCamera;
 import com.onlylemi.mapview.library.camera.ContainPointsMode;
 import com.onlylemi.mapview.library.camera.ContainPointsUserMode;
