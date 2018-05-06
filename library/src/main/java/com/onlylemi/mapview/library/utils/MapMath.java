@@ -8,6 +8,7 @@ import android.util.Log;
 import com.onlylemi.mapview.library.MapView;
 import com.onlylemi.mapview.library.utils.math.FloydAlgorithm;
 import com.onlylemi.mapview.library.utils.math.GeneticAlgorithm;
+import com.onlylemi.mapview.library.utils.math.Line;
 import com.onlylemi.mapview.library.utils.math.TSPNearestNeighbour;
 
 import java.lang.annotation.Target;
@@ -421,8 +422,21 @@ public final class MapMath {
         outPoint.y /= length;
         return outPoint;
     }
+
     public static PointF pointSubtract(PointF p1, PointF p2) {
         return new PointF(p1.x - p2.x, p1.y - p2.y);
+    }
+
+    public static float crossProduct(PointF u, PointF v) {
+        return crossProduct(u.x, u.y, v.x, v.y);
+    }
+
+    public static float crossProduct(Line l1, Line l2) {
+        return crossProduct(l1.getX(), l1.getY(), l2.getX(), l2.getY());
+    }
+
+    public static float crossProduct(float x1, float y1, float x2, float y2) {
+        return (x1 * y2) - (y1 * x2);
     }
 
 }
