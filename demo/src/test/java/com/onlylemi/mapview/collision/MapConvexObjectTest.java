@@ -13,6 +13,8 @@ import org.robolectric.RobolectricTestRunner;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.onlylemi.mapview.TestHelper.point;
+
 /**
  * Created by patnym on 2018-05-06.
  */
@@ -21,10 +23,6 @@ import java.util.List;
 public class MapConvexObjectTest {
 
     //region Help Methods
-
-    public PointF point(float x, float y) {
-        return new PointF(x, y);
-    }
 
     private void verifyPointsOutside(PointF[] points, MapConvexObject cObject) {
         for (PointF point : points) {

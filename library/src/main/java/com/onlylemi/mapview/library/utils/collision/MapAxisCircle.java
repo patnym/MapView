@@ -6,6 +6,7 @@ import android.graphics.Paint;
 import android.graphics.PointF;
 
 import com.onlylemi.mapview.library.utils.MapMath;
+import com.onlylemi.mapview.library.utils.math.Line;
 
 /**
  * Created by patnym on 14/12/2017.

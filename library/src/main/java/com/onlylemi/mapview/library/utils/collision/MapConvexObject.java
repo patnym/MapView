@@ -14,7 +14,7 @@ import java.util.List;
  * Created by patnym on 2018-05-06.
  */
 
-public class MapConvexObject extends BaseCollision {
+public class MapConvexObject extends BaseCollisionMesh {
 
     List<Line> collisionShape;
 

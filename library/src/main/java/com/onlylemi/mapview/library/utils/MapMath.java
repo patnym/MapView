@@ -24,6 +24,8 @@ public final class MapMath {
 
     private MapMath() {}
 
+    public static float FLOAT_EPSILON = 0.00001f;
+
     /**
      * Represents 1 second in nanoseconds
      */
@@ -439,4 +441,7 @@ public final class MapMath {
         return (x1 * y2) - (y1 * x2);
     }
 
+    public static boolean isLesserOrEqual(float x1, float x2) {
+        return (x1 - x2) < FLOAT_EPSILON;
+    }
 }

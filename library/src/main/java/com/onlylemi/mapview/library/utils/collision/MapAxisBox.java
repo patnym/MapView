@@ -1,17 +1,21 @@
 package com.onlylemi.mapview.library.utils.collision;
 
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PointF;
 
 import com.onlylemi.mapview.library.utils.MapMath;
+import com.onlylemi.mapview.library.utils.math.Line;
+
+import java.util.ArrayList;
 
 /**
  * Created by patnym on 14/12/2017.
  */
 
-public class MapAxisBox extends BaseCollision {
+public class MapAxisBox extends BaseCollisionMesh {
 
     private float width;
     private float height;
@@ -25,6 +29,7 @@ public class MapAxisBox extends BaseCollision {
         this.debugPaint = new Paint();
         this.debugPaint.setStyle(Paint.Style.STROKE);
         this.debugPaint.setStrokeWidth(2.0f);
+        createCollisionLines(this.position);
     }
 
 
@@ -39,5 +44,25 @@ public class MapAxisBox extends BaseCollision {
         PointF topLeft = MapMath.transformPoint(m, position);
         PointF botRight = MapMath.transformPoint(m, new PointF(position.x + width, position.y + height));
         canvas.drawRect(topLeft.x, topLeft.y, botRight.x, botRight.y, debugPaint);
+    }
+
+    private void createCollisionLines(PointF topLeft) {
+        collisionLines = new ArrayList(4);
+        collisionLines.add(new Line(
+                new PointF(topLeft.x, topLeft.y),
+                new PointF(topLeft.x + width, topLeft.y)
+        ));
+        collisionLines.add(new Line(
+                new PointF(topLeft.x + width, topLeft.y),
+                new PointF(topLeft.x + width, topLeft.y + height)
+        ));
+        collisionLines.add(new Line(
+                new PointF(topLeft.x + width, topLeft.y + height),
+                new PointF(topLeft.x, topLeft.y + height)
+        ));
+        collisionLines.add(new Line(
+                new PointF(topLeft.x, topLeft.y + height),
+                new PointF(topLeft.x, topLeft.y)
+        ));
     }
 }

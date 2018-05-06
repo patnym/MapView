@@ -5,6 +5,10 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PointF;
 
+import com.onlylemi.mapview.library.utils.math.Line;
+
+import java.util.List;
+
 /**
  * Created by patnym on 14/12/2017.
  */
@@ -14,7 +18,6 @@ public abstract class BaseCollision {
     protected PointF position;
 
     protected Paint debugPaint;
-
 
     public abstract boolean isPointInside(PointF position);
 
