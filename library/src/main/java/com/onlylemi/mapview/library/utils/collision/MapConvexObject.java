@@ -34,6 +34,10 @@ public class MapConvexObject extends BaseCollisionMesh {
                     )));
             prev = cur;
         }
+        if(!isShapeConvex(collisionShape)) {
+            throw new IllegalArgumentException("Shape must be convex, " +
+                    "AKA: All sides must turn the same direction");
+        }
     }
 
     @Override
@@ -57,7 +61,7 @@ public class MapConvexObject extends BaseCollisionMesh {
 
     }
 
-    private Direction getDirection(Line u, Line v) {
+    public static Direction getDirection(Line u, Line v) {
         float value = MapMath.crossProduct(u, v);
         if(value > 0) {
             return Direction.LEFT;
@@ -67,9 +71,25 @@ public class MapConvexObject extends BaseCollisionMesh {
         return Direction.SAME;
     }
 
-    private enum Direction {
+    public enum Direction {
         LEFT,
         RIGHT,
         SAME
+    }
+
+    public static boolean isShapeConvex(List<Line> shape) {
+        Direction dir = Direction.SAME;
+        Line prev = shape.get(shape.size() - 1);
+        for(int i = 0; i < shape.size(); i++) {
+            Direction nDir = getDirection(prev, shape.get(i));
+            if(dir == Direction.SAME) {
+                dir = nDir;
+            } else if(nDir != Direction.SAME &&
+                    nDir != dir) {
+                return false;
+            }
+            prev = shape.get(i);
+        }
+        return true;
     }
 }

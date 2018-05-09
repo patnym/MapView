@@ -3,6 +3,7 @@ package com.onlylemi.mapview.collision;
 import android.graphics.PointF;
 
 import com.onlylemi.mapview.library.utils.collision.MapConvexObject;
+import com.onlylemi.mapview.library.utils.math.Line;
 
 import junit.framework.Assert;
 
@@ -47,6 +48,24 @@ public class MapConvexObjectTest {
         }
     }
 
+    public List<Line> collisionShapeFromPoints(List<PointF> shape) {
+        List<Line> collisionShape = new ArrayList();
+        PointF prev = shape.get(shape.size() - 1);
+        for(int i = 0; i < shape.size(); i++) {
+            PointF cur = shape.get(i);
+            collisionShape.add(new Line(
+                    new PointF(
+                            prev.x,
+                            prev.y
+                    ),  new PointF(
+                    cur.x,
+                    cur.y
+            )));
+            prev = cur;
+        }
+        return collisionShape;
+    }
+
     public List<PointF> triangleShape() {
         List<PointF> returnObject = new ArrayList();
         returnObject.add(point(0, 0));
@@ -66,6 +85,18 @@ public class MapConvexObjectTest {
         returnObject.add(point(-1.0f, 0.0f));
         returnObject.add(point(-0.75f, 0.75f));
         return returnObject;
+    }
+
+    public List<PointF> nonConvexShape() {
+        List<PointF> nonConvexShape = new ArrayList();
+        nonConvexShape.add(point(0, 0));
+        nonConvexShape.add(point(0, 1));
+        nonConvexShape.add(point(1, 1));
+        nonConvexShape.add(point(1, 0));
+        nonConvexShape.add(point(2, 0));
+        nonConvexShape.add(point(2, -1));
+        nonConvexShape.add(point(0, -1));
+        return nonConvexShape;
     }
 
     public PointF[] triangle_inside_points() {
@@ -181,5 +212,26 @@ public class MapConvexObjectTest {
         offsetPoints(points, position);
         MapConvexObject convexObject = new MapConvexObject(position, hexagonShape());
         verifyPointsOutside(points, convexObject);
+    }
+
+    @Test
+    public void can_verify_if_object_is_convex() {
+        Assert.assertTrue(MapConvexObject.isShapeConvex(collisionShapeFromPoints(hexagonShape())));
+    }
+
+    @Test
+    public void can_verify_if_object_is_not_convex() {
+        Assert.assertFalse(MapConvexObject.isShapeConvex(collisionShapeFromPoints(nonConvexShape())));
+    }
+
+    @Test
+    public void object_is_convex() {
+        MapConvexObject cObject = new MapConvexObject(point(0, 0), hexagonShape());
+        Assert.assertNotNull(cObject);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void object_throws_if_not_convex() {
+        new MapConvexObject(point(0, 0), nonConvexShape());
     }
 }
