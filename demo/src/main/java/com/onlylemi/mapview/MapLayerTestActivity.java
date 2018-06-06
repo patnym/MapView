@@ -124,7 +124,7 @@ public class MapLayerTestActivity extends AppCompatActivity {
 
                 mapView.setDebug(true);
 
-
+                mapView.setDefaultContainUserZoomFactor(1.5f);
                 //userHandler.moveUser(MapMath.transformPoint(transformMatrix, new PointF(1.4f, 2.0f)), 5.0f);
                 mapView.setContainerUserMode();
             }
@@ -185,7 +185,7 @@ public class MapLayerTestActivity extends AppCompatActivity {
             }
 
             if (keyCode == KeyEvent.KEYCODE_H) {
-                mapView.pauseRendering();
+                mapView.pauseRendering(false);
             }
 
             if (keyCode == KeyEvent.KEYCODE_R) {

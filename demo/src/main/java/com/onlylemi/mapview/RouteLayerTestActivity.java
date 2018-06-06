@@ -157,7 +157,7 @@ public class RouteLayerTestActivity extends AppCompatActivity {
 
             if (keyCode == KeyEvent.KEYCODE_H) {
                 //mapView.setFreeMode();
-                mapView.pauseRendering();
+                mapView.pauseRendering(false);
             }
 
             if (keyCode == KeyEvent.KEYCODE_K) {
