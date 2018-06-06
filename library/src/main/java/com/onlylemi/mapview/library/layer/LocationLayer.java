@@ -4,19 +4,14 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PointF;
-import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.support.annotation.NonNull;
-import android.util.Log;
-import android.view.MotionEvent;
 
 import com.onlylemi.mapview.library.MapView;
 import com.onlylemi.mapview.library.MapViewRenderer;
 import com.onlylemi.mapview.library.graphics.implementation.LocationUser;
 import com.onlylemi.mapview.library.layer.handlers.BaseLayerHandler;
 import com.onlylemi.mapview.library.messages.ICommand;
-import com.onlylemi.mapview.library.messages.MessageDefenitions;
 
 import java.util.List;
 
@@ -25,7 +20,7 @@ import java.util.List;
  *
  * @author: onlylemi
  */
-public class LocationLayer extends MapBaseLayer {
+public class LocationLayer extends BaseLayer {
     private static final String TAG ="LocationLayer";
 
     //user

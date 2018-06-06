@@ -6,8 +6,8 @@ import android.graphics.Color;
 import com.onlylemi.mapview.library.graphics.IBackground;
 import com.onlylemi.mapview.library.graphics.implementation.Backgrounds.ColorBackground;
 import com.onlylemi.mapview.library.graphics.implementation.LocationUser;
-import com.onlylemi.mapview.library.layer.MapBaseLayer;
-import com.onlylemi.mapview.library.layer.MapLayer;
+import com.onlylemi.mapview.library.layer.BaseLayer;
+import com.onlylemi.mapview.library.layer.BaseMapLayer;
 
 /**
  * Created by patnym on 26/12/2017.
@@ -36,9 +36,9 @@ public class MapViewSetupHandler {
      * @param background
      */
     public void createMap(Bitmap bmp, IBackground background) {
-        MapLayer mapLayer = new MapLayer(view, bmp, background);
-        addLayer(mapLayer);
-        renderer.setMapLayer(mapLayer);
+        BaseMapLayer baseMapLayer = new BaseMapLayer(view, bmp, background);
+        addLayer(baseMapLayer);
+        renderer.setMapLayer(baseMapLayer);
     }
 
     /**
@@ -55,7 +55,7 @@ public class MapViewSetupHandler {
         currentUser = user;
     }
 
-    public void addLayer(MapBaseLayer layer) {
+    public void addLayer(BaseLayer layer) {
         layer.createHandler(renderer);
         renderer.addLayer(layer);
     }

@@ -10,11 +10,11 @@ import com.onlylemi.mapview.library.MapView;
 import com.onlylemi.mapview.library.MapViewRenderer;
 
 /**
- * MapBaseLayer
+ * BaseLayer
  *
  * @author: onlylemi
  */
-public abstract class MapBaseLayer {
+public abstract class BaseLayer {
 
     // map layer level
     protected static final int MAP_LEVEL = 0;
@@ -32,7 +32,7 @@ public abstract class MapBaseLayer {
 
     protected MapView mapView;
 
-    public MapBaseLayer(MapView mapView) {
+    public BaseLayer(MapView mapView) {
         this.mapView = mapView;
     }
 

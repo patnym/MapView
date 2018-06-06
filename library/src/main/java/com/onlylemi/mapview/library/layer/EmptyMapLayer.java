@@ -1,12 +1,8 @@
 package com.onlylemi.mapview.library.layer;
 
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Matrix;
-import android.graphics.Paint;
-import android.graphics.Rect;
 import android.graphics.RectF;
-import android.view.ViewTreeObserver;
 
 import com.onlylemi.mapview.library.MapView;
 
@@ -16,7 +12,7 @@ import com.onlylemi.mapview.library.MapView;
  */
 //// TODO: 2018-03-31 Rewrite this layer, maybe we even want to not have this?
 @Deprecated
-public class EmptyMapLayer extends MapLayer {
+public class EmptyMapLayer extends BaseMapLayer {
 
     private RectF worldRect;
 
