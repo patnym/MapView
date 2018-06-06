@@ -290,7 +290,8 @@ public class MapViewCamera {
     }
 
     public void setDefaultContainUserZoomFactor(float factor) {
-        defaultContainUserZoom *= factor;
+        containUserZoomFactor = factor;
+        defaultContainUserZoom *= containUserZoomFactor;
     }
 
     public float getDefaultContainUserZoom() {
