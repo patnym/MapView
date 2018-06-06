@@ -151,7 +151,7 @@ public class MarkLayer extends MapBaseLayer {
         this.markObjects.addAll(proxMarks);
     }
 
-    public void setProximityMarks(final List<ProximityMark> proxMarks) {
+    public void setProximityMarks(final List<? extends ProximityMark> proxMarks) {
         this.markObjects.removeAll(this.proxMarks);
         this.proxMarks = new ArrayList<>(proxMarks);
         this.markObjects.addAll(this.proxMarks);
@@ -203,7 +203,7 @@ public class MarkLayer extends MapBaseLayer {
             });
         }
 
-        public void setProximityMarks(final List<ProximityMark> proxMarks) {
+        public void setProximityMarks(final List<? extends ProximityMark> proxMarks) {
             runOnRenderThread(new ICommand() {
                 @Override
                 public void execute() {
