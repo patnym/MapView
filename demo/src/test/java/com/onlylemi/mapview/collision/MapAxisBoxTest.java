@@ -25,4 +25,12 @@ public class MapAxisBoxTest {
         Line line = box1.findCommonEdge(box2);
         testPointsAreLine(line, point(1, -1), point(1, 1));
     }
+
+    @Test
+    public void can_create_from_two_points() {
+        MapAxisBox box1 = new MapAxisBox(point(-1, 1), point(1, -1));
+        MapAxisBox box2 = new MapAxisBox(point(1, 1), point(3, -1));
+        Line line = box1.findCommonEdge(box2);
+        testPointsAreLine(line, point(1, -1), point(1, 1));
+    }
 }

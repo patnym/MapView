@@ -7,6 +7,7 @@ import com.onlylemi.mapview.library.navigation.Edge;
 import com.onlylemi.mapview.library.navigation.Space;
 import com.onlylemi.mapview.library.utils.collision.MapAxisBox;
 import com.onlylemi.mapview.library.utils.collision.MapAxisCircle;
+import com.onlylemi.mapview.library.utils.collision.MapConvexObject;
 
 import junit.framework.Assert;
 
@@ -90,4 +91,14 @@ public class SpaceTest {
         Edge edge = space1.findCommonEdge(space2);
         Assert.assertEquals(point(1, 0), edge.getMidpoint());
     }
+
+    @Test
+    public void return_null_on_none_common_edge() {
+        Space space1 = new Space(new MapAxisBox(point(0, 0), 3f, 14f));
+        Space space2 = new Space(new MapAxisBox(point(7,0), 3f, 14f));
+        Edge edge = space1.findCommonEdge(space2);
+        Assert.assertNull(edge);
+    }
+    
+    //// TODO: 2018-05-27 Write above tests but for a convex shape aswell 
 }

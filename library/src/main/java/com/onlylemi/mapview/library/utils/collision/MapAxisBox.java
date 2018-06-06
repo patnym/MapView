@@ -20,6 +20,11 @@ public class MapAxisBox extends BaseCollisionMesh {
     private float width;
     private float height;
 
+    public MapAxisBox(PointF topLeft, PointF botRight) {
+        this(new PointF(topLeft.x + ((botRight.x - topLeft.x) / 2),
+                topLeft.y + ((botRight.y - topLeft.y) / 2)),
+                botRight.x - topLeft.x, botRight.y - topLeft.y);
+    }
 
     public MapAxisBox(PointF position, float width, float height) {
         this.position = new PointF(position.x - (width / 2), position.y - (height / 2));

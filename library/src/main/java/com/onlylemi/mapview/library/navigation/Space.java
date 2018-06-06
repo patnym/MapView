@@ -44,6 +44,9 @@ public class Space {
 
     public Edge findCommonEdge(Space space) {
         Line l = shape.findCommonEdge(space.shape);
+        if(l == null) {
+            return null;
+        }
         return new Edge(l);
     }
 

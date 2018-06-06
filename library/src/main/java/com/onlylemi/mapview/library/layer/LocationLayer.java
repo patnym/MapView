@@ -17,6 +17,7 @@ import com.onlylemi.mapview.library.graphics.implementation.LocationUser;
 import com.onlylemi.mapview.library.layer.handlers.BaseLayerHandler;
 import com.onlylemi.mapview.library.messages.ICommand;
 import com.onlylemi.mapview.library.messages.MessageDefenitions;
+import com.onlylemi.mapview.library.navigation.Space;
 
 import java.util.List;
 
@@ -32,6 +33,7 @@ public class LocationLayer extends MapBaseLayer {
     private LocationUser user;
 
     private Paint locationPaint;
+    public List<Space> test;
 
     //Outside usage use this handler to interact with the user
     private UserHandler handler;
@@ -73,6 +75,9 @@ public class LocationLayer extends MapBaseLayer {
     public void debugDraw(Canvas canvas, Matrix currentMatrix) {
         if(isVisible) {
             user.debugDraw(currentMatrix, canvas);
+        }
+        for(int i = 0; i < test.size(); i++) {
+            test.get(i).debugDraw(currentMatrix, canvas);
         }
     }
 
