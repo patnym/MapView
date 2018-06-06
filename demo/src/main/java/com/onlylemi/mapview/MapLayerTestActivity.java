@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.RelativeLayout;
 
+import com.onlylemi.mapview.components.TestMapLayer;
 import com.onlylemi.mapview.library.MapView;
 import com.onlylemi.mapview.library.MapViewSetupHandler;
 import com.onlylemi.mapview.library.MapViewSetupCallback;
@@ -77,7 +78,7 @@ public class MapLayerTestActivity extends AppCompatActivity {
             public void onSetup(MapViewSetupHandler handler) {
                 try {
                     Bitmap map = BitmapFactory.decodeStream(getAssets().open("bromma_floor_plan810.png"));
-                    handler.createMap(map);
+                    handler.createMap(new TestMapLayer(mapView, map.getWidth(), map.getHeight()));
                     transformMatrix = MapMath.createMappingMatrix(map, 5, 7, new PointF(0, 0), new PointF(map.getWidth(), map.getHeight()));   //<--------- THIS IS FOR THE BACKEND ROOM PNG
                     user = new LocationUser(BitmapFactory.decodeStream(getAssets().open("marker.png")), MapMath.transformPoint(transformMatrix, position), new PointF(1, 0));
                 } catch(IOException ex) {

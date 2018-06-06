@@ -3,10 +3,8 @@ package com.onlylemi.mapview.library.layer;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Point;
 import android.graphics.PointF;
 import android.os.Handler;
-import android.view.MotionEvent;
 
 import com.onlylemi.mapview.library.MapView;
 import com.onlylemi.mapview.library.MapViewRenderer;
@@ -16,11 +14,8 @@ import com.onlylemi.mapview.library.graphics.implementation.LocationUser;
 import com.onlylemi.mapview.library.graphics.implementation.ProximityMark;
 import com.onlylemi.mapview.library.layer.handlers.BaseLayerHandler;
 import com.onlylemi.mapview.library.messages.ICommand;
-import com.onlylemi.mapview.library.messages.MessageDefenitions;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -28,7 +23,7 @@ import java.util.List;
  *
  * @author: onlylemi
  */
-public class MarkLayer extends MapBaseLayer {
+public class MarkLayer extends BaseLayer {
 
     private MarkHandler handler;
 

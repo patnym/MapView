@@ -2,35 +2,19 @@ package com.onlylemi.mapview.library.layer;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Picture;
-import android.graphics.PointF;
-import android.graphics.Rect;
-import android.graphics.RectF;
-import android.util.Log;
-import android.view.MotionEvent;
-import android.view.ViewTreeObserver;
 
 import com.onlylemi.mapview.library.MapView;
 import com.onlylemi.mapview.library.graphics.IBackground;
-import com.onlylemi.mapview.library.graphics.implementation.Backgrounds.ColorBackground;
-import com.onlylemi.mapview.library.utils.MapAABB;
 
 /**
- * MapLayer
- *
- * @author: onlylemi
+ * Created by patnym on 2018-06-06.
  */
-public class MapLayer extends MapBaseLayer {
-
+public class MapLayer extends BaseMapLayer {
     private static final String TAG = "MapLayer";
 
     private Bitmap bmp;
-
-    private int width;
-    private int height;
 
     protected Paint paint;
     protected IBackground background;
@@ -79,10 +63,12 @@ public class MapLayer extends MapBaseLayer {
 
     }
 
+    @Override
     public int getWidth() {
         return width;
     }
 
+    @Override
     public int getHeight() {
         return height;
     }

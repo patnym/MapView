@@ -15,11 +15,9 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 
 import com.onlylemi.mapview.library.camera.MapViewCamera;
-import com.onlylemi.mapview.library.graphics.IBackground;
-import com.onlylemi.mapview.library.graphics.implementation.Backgrounds.ColorBackground;
 import com.onlylemi.mapview.library.graphics.implementation.LocationUser;
-import com.onlylemi.mapview.library.layer.MapBaseLayer;
-import com.onlylemi.mapview.library.layer.MapLayer;
+import com.onlylemi.mapview.library.layer.BaseLayer;
+import com.onlylemi.mapview.library.layer.BaseMapLayer;
 import com.onlylemi.mapview.library.messages.ICameraModeCommand;
 import com.onlylemi.mapview.library.messages.ICommand;
 import com.onlylemi.mapview.library.messages.MessageDefenitions;
@@ -48,8 +46,8 @@ public class MapViewRenderer extends Thread {
     private SurfaceHolder rootHolder;
     protected MapView mapView;
     private boolean running = false;
-    private MapLayer rootLayer;
-    private List<MapBaseLayer> layers;
+    private BaseMapLayer rootLayer;
+    private List<BaseLayer> layers;
 
     private MapViewCamera camera;
 
@@ -109,7 +107,7 @@ public class MapViewRenderer extends Thread {
 
     public void onSurfaceChanged(int width, int height) {
         this.camera.onViewChanged(width, height);
-        for(MapBaseLayer layer : layers) {
+        for(BaseLayer layer : layers) {
             layer.onViewChanged(width, height);
         }
     }
@@ -299,11 +297,11 @@ public class MapViewRenderer extends Thread {
         }
     }
 
-    public void addLayer(MapBaseLayer layer) {
+    public void addLayer(BaseLayer layer) {
         layers.add(layer);
     }
 
-    public void setMapLayer(MapLayer layer) {
+    public void setMapLayer(BaseMapLayer layer) {
         rootLayer = layer;
     }
 
@@ -461,7 +459,7 @@ public class MapViewRenderer extends Thread {
     }
 
     private void feedInputToLayers(float x, float y) {
-        for (MapBaseLayer layer : layers) {
+        for (BaseLayer layer : layers) {
             layer.onTouch(x, y);
         }
     }

@@ -1,22 +1,14 @@
 package com.onlylemi.mapview.library.layer;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PointF;
-import android.view.MotionEvent;
 
 import com.onlylemi.mapview.library.MapView;
-import com.onlylemi.mapview.library.R;
 import com.onlylemi.mapview.library.graphics.BaseGraphics;
 import com.onlylemi.mapview.library.graphics.implementation.LocationUser;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -26,7 +18,7 @@ import java.util.List;
  */
 //// TODO: 2018-03-31 Rewrite this using Path object
 @Deprecated
-public class RouteLayer extends MapBaseLayer {
+public class RouteLayer extends BaseLayer {
 
     private List<PointF> routeList; // routes list
     private BaseGraphics user; //Reference to the user graphics

@@ -13,9 +13,8 @@ import android.view.SurfaceView;
 import android.view.View;
 
 import com.onlylemi.mapview.library.camera.MapViewCamera;
-import com.onlylemi.mapview.library.layer.EmptyMapLayer;
-import com.onlylemi.mapview.library.layer.MapBaseLayer;
-import com.onlylemi.mapview.library.layer.MapLayer;
+import com.onlylemi.mapview.library.layer.BaseLayer;
+import com.onlylemi.mapview.library.layer.BaseMapLayer;
 import com.onlylemi.mapview.library.messages.ICameraModeCommand;
 import com.onlylemi.mapview.library.messages.MessageDefenitions;
 import com.onlylemi.mapview.library.messages.MotionEventMessage;
@@ -34,8 +33,8 @@ public class MapView extends SurfaceView implements SurfaceHolder.Callback, Chor
 
     private MapViewListener mapViewListener = null;
     private MapViewSetupCallback setupCallback = null;
-    private List<MapBaseLayer> layers; // all layers
-    private MapLayer mapLayer;
+    private List<BaseLayer> layers; // all layers
+    private BaseMapLayer baseMapLayer;
 
     private boolean hardStopOnVisibilityChanged = false;
 
@@ -61,9 +60,9 @@ public class MapView extends SurfaceView implements SurfaceHolder.Callback, Chor
     private void initMapView() {
         getHolder().addCallback(this);
 
-        layers = new ArrayList<MapBaseLayer>() {
+        layers = new ArrayList<BaseLayer>() {
             @Override
-            public boolean add(MapBaseLayer layer) {
+            public boolean add(BaseLayer layer) {
                 if (layers.size() != 0) {
                     if (layer.level >= this.get(this.size() - 1).level) {
                         super.add(layer);
@@ -164,26 +163,6 @@ public class MapView extends SurfaceView implements SurfaceHolder.Callback, Chor
         if(this.thread != null) {
             this.thread.setSetupCallback(callback);
         }
-    }
-
-    /**
-     * This creates an empty canavas to draw your own map on
-     * Will not trigger the failed maploading listener as we are not loading anything
-     * Triggers the loadSuccess to for consistency
-     * @param width
-     * @param height
-     */
-    // TODO: 2018-03-31 Fix this to work with the new initialization
-    @Deprecated
-    public void createMap(int width, int height) {
-        if(mapLayer == null) {
-            mapLayer = new EmptyMapLayer(this, width, height);
-            layers.add(mapLayer);
-        }
-        if(mapViewListener != null) {
-            mapViewListener.onMapLoadSuccess();
-        }
-        //isMapLoadFinish = true;
     }
 
     @Override
