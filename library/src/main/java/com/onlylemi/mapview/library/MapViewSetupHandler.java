@@ -8,6 +8,7 @@ import com.onlylemi.mapview.library.graphics.implementation.Backgrounds.ColorBac
 import com.onlylemi.mapview.library.graphics.implementation.LocationUser;
 import com.onlylemi.mapview.library.layer.BaseLayer;
 import com.onlylemi.mapview.library.layer.BaseMapLayer;
+import com.onlylemi.mapview.library.layer.MapLayer;
 
 /**
  * Created by patnym on 26/12/2017.
@@ -36,19 +37,20 @@ public class MapViewSetupHandler {
      * @param background
      */
     public void createMap(Bitmap bmp, IBackground background) {
-        BaseMapLayer baseMapLayer = new BaseMapLayer(view, bmp, background);
+        BaseMapLayer baseMapLayer = new MapLayer(view, bmp, background);
         addLayer(baseMapLayer);
         renderer.setMapLayer(baseMapLayer);
     }
 
     /**
-     * Creates a empty canvas map
-     * @param width
-     * @param height
+     * Creates a map from a map object, can be your own extension
+     * The regular MapLayer draws the background before the map
+     * I heavily recommend you do the same in your own extension
+     * @param map
      */
-    //// TODO: 2018-03-31 Implement this
-    public void createMap(int width, int height) {
-
+    public void createMap(BaseMapLayer map) {
+        addLayer(map);
+        renderer.setMapLayer(map);
     }
 
     public void setTrackedUser(LocationUser user) {

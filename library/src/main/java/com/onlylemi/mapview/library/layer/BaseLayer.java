@@ -61,15 +61,6 @@ public abstract class BaseLayer {
         this.renderer = renderThread;
     }
 
-    public void setLevel(int level) {
-        this.level = level;
-    }
-
-    protected float setValue(float value) {
-        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, value, mapView.getResources()
-                .getDisplayMetrics());
-    }
-
     public void triggerChange() {
         hasChanged = true;
     }

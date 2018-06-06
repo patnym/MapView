@@ -13,7 +13,6 @@ import android.view.SurfaceView;
 import android.view.View;
 
 import com.onlylemi.mapview.library.camera.MapViewCamera;
-import com.onlylemi.mapview.library.layer.EmptyMapLayer;
 import com.onlylemi.mapview.library.layer.BaseLayer;
 import com.onlylemi.mapview.library.layer.BaseMapLayer;
 import com.onlylemi.mapview.library.messages.ICameraModeCommand;
@@ -164,26 +163,6 @@ public class MapView extends SurfaceView implements SurfaceHolder.Callback, Chor
         if(this.thread != null) {
             this.thread.setSetupCallback(callback);
         }
-    }
-
-    /**
-     * This creates an empty canavas to draw your own map on
-     * Will not trigger the failed maploading listener as we are not loading anything
-     * Triggers the loadSuccess to for consistency
-     * @param width
-     * @param height
-     */
-    // TODO: 2018-03-31 Fix this to work with the new initialization
-    @Deprecated
-    public void createMap(int width, int height) {
-        if(baseMapLayer == null) {
-            baseMapLayer = new EmptyMapLayer(this, width, height);
-            layers.add(baseMapLayer);
-        }
-        if(mapViewListener != null) {
-            mapViewListener.onMapLoadSuccess();
-        }
-        //isMapLoadFinish = true;
     }
 
     @Override
