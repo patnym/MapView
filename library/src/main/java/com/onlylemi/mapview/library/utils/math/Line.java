@@ -110,4 +110,8 @@ public class Line {
     public PointF getMidPoint() {
         return midPoint;
     }
+
+    public void setDebugColor(int color) {
+        this.debugPaint.setColor(color);
+    }
 }

@@ -1,6 +1,7 @@
 package com.onlylemi.mapview.library.utils.collision;
 
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.PointF;
 
@@ -16,15 +17,17 @@ import java.util.List;
 
 public class MapConvexObject extends BaseCollisionMesh {
 
-    List<Line> collisionShape;
+    public MapConvexObject(List<PointF> shape) {
+        this(new PointF(0, 0), shape);
+    }
 
     public MapConvexObject(PointF position, List<PointF> shape) {
         this.position = position;
-        this.collisionShape = new ArrayList();
+        this.collisionLines = new ArrayList();
         PointF prev = shape.get(shape.size() - 1);
         for(int i = 0; i < shape.size(); i++) {
             PointF cur = shape.get(i);
-            collisionShape.add(new Line(
+            collisionLines.add(new Line(
                         new PointF(
                             prev.x + position.x,
                             prev.y + position.y
@@ -32,9 +35,10 @@ public class MapConvexObject extends BaseCollisionMesh {
                             cur.x + position.x,
                             cur.y + position.y
                     )));
+            collisionLines.get(i).setDebugColor(Color.BLACK);
             prev = cur;
         }
-        if(!isShapeConvex(collisionShape)) {
+        if(!isShapeConvex(collisionLines)) {
             throw new IllegalArgumentException("Shape must be convex, " +
                     "AKA: All sides must turn the same direction");
         }
@@ -43,8 +47,8 @@ public class MapConvexObject extends BaseCollisionMesh {
     @Override
     public boolean isPointInside(PointF position) {
         Direction dir = Direction.SAME;
-        for(int i = 0; i < collisionShape.size(); i++) {
-            Line shapeLine = collisionShape.get(i);
+        for(int i = 0; i < collisionLines.size(); i++) {
+            Line shapeLine = collisionLines.get(i);
             Direction nDir = getDirection(shapeLine, new Line(shapeLine.getStart(), position));
             if(dir == Direction.SAME) {
                 dir = nDir;
@@ -58,7 +62,9 @@ public class MapConvexObject extends BaseCollisionMesh {
 
     @Override
     public void debugDraw(Matrix m, Canvas canvas) {
-
+        for (Line l : collisionLines) {
+            l.debugDraw(m, canvas);
+        }
     }
 
     public static Direction getDirection(Line u, Line v) {

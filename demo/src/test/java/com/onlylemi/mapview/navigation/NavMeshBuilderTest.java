@@ -2,16 +2,21 @@ package com.onlylemi.mapview.navigation;
 
 import android.graphics.PointF;
 
+import com.onlylemi.mapview.TestHelper;
 import com.onlylemi.mapview.library.navigation.Edge;
+import com.onlylemi.mapview.library.navigation.NavMesh;
 import com.onlylemi.mapview.library.navigation.NavMeshBuilder;
 import com.onlylemi.mapview.library.navigation.Space;
 import com.onlylemi.mapview.library.utils.collision.MapAxisBox;
+import com.onlylemi.mapview.library.utils.collision.MapConvexObject;
 
 import junit.framework.Assert;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
+
+import static com.onlylemi.mapview.TestHelper.createBox;
 
 /**
  * Created by patnym on 2018-05-06.
@@ -41,12 +46,33 @@ public class NavMeshBuilderTest {
     }
 
     @Test
+    public void can_link_convex_spaces() {
+        Space s1 = new Space(new MapConvexObject(createBox(
+                new PointF(22.4f, 81.0f),
+                new PointF(245.4f, 140f)
+        )));
+
+        Space s2 = new Space(new MapConvexObject(createBox(
+                new PointF(245.4f, 81.0f),
+                new PointF(284.9f, 384.5f)
+        )));
+        NavMeshBuilder.connectSpaces(s1, s2);
+        Assert.assertTrue(s1.getNeighbours().size() > 0);
+        Assert.assertTrue(s2.getNeighbours().size() > 0);
+    }
+
+    @Test
     public void can_create_correct_edge_between_axisbox_spaces() {
         createAxisBoxSpaces();
         NavMeshBuilder.connectSpaces(space1, space2);
         Edge edge = space1.getNeighbourEdge(space2);
         Assert.assertEquals(new PointF(1, 0), edge.getMidpoint());
     }
+
+//    @Test
+//    public void can_create_correct_edge_between_convex_spaces() {
+//
+//    }
 
     @Test
     public void edges_are_not_same_reference() {

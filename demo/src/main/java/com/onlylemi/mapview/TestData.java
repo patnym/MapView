@@ -2,6 +2,10 @@ package com.onlylemi.mapview;
 
 import android.graphics.PointF;
 
+import com.onlylemi.mapview.library.navigation.NavMeshBuilder;
+import com.onlylemi.mapview.library.navigation.Space;
+import com.onlylemi.mapview.library.utils.collision.MapConvexObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +17,76 @@ import java.util.List;
 public final class TestData {
 
     private TestData() {}
+
+    /**
+     * Represents the top left 3 shelfs in the bromma floor plan test map
+     * @return
+     */
+    public static List<Space> getSpaceList() {
+        List<Space> spaces = new ArrayList<>();
+        Space s1 = new Space(new MapConvexObject(createBox(
+                new PointF(22.4f, 81.0f),
+                new PointF(245.4f, 140f)
+        )));
+
+        Space s2 = new Space(new MapConvexObject(createBox(
+                new PointF(245.4f, 81.0f),
+                new PointF(284.9f, 384.5f)
+        )));
+
+        Space s3 = new Space(new MapConvexObject(createBox(
+                new PointF(22.4f, 328f),
+                new PointF(245.4f, 384.5f)
+        )));
+
+        Space s4 = new Space(new MapConvexObject(createBox(
+                new PointF(22.4f, 140f),
+                new PointF(81.4f, 328f)
+        )));
+
+        Space s5 = new Space(new MapConvexObject(createBox(
+                new PointF(81.4f, 179.5f),
+                new PointF(245.4f, 226f)
+        )));
+
+        Space s6 = new Space(new MapConvexObject(createBox(
+                new PointF(81.4f, 243f),
+                new PointF(245.4f, 290.5f)
+        )));
+
+        NavMeshBuilder.connectSpaces(s1, s4);
+        NavMeshBuilder.connectSpaces(s1, s2);
+
+        NavMeshBuilder.connectSpaces(s4, s5);
+        NavMeshBuilder.connectSpaces(s4, s6);
+
+        NavMeshBuilder.connectSpaces(s3, s4);
+        NavMeshBuilder.connectSpaces(s3, s2);
+
+        NavMeshBuilder.connectSpaces(s2, s5);
+        NavMeshBuilder.connectSpaces(s2, s6);
+
+        spaces.add(s1);
+        spaces.add(s2);
+        spaces.add(s3);
+        spaces.add(s4);
+        spaces.add(s5);
+        spaces.add(s6);
+
+        return spaces;
+    }
+
+    private static List<PointF> createBox(PointF topLeft, PointF botRight) {
+        float width = botRight.x - topLeft.x;
+        float height = botRight.y - topLeft.y;
+
+        List<PointF> shape = new ArrayList<>();
+        shape.add(new PointF(topLeft.x, topLeft.y));
+        shape.add(new PointF(topLeft.x + width, topLeft.y));
+        shape.add(new PointF(botRight.x, botRight.y));
+        shape.add(new PointF(topLeft.x, topLeft.y + height));
+        return shape;
+    }
 
     public static List<PointF> getNodesList() {
         List<PointF> nodes = new ArrayList<>();

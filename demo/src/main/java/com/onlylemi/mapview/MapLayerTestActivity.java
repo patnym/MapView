@@ -88,19 +88,19 @@ public class MapLayerTestActivity extends AppCompatActivity {
                     return;
                 }
 
-                List<Space> spaces = new ArrayList<>();
-                spaces.add(new Space(
-                        new MapAxisBox(new PointF(287 / 2, 1085), 287, 2170)
-                ));
-                spaces.add(new Space(
-                        new MapAxisBox(new PointF(287 + (287 / 2), 542.5f / 2), 287, 542.5f)
-                ));
-                NavMeshBuilder.connectSpaces(spaces.get(0), spaces.get(1));
+//                List<Space> spaces = new ArrayList<>();
+//                spaces.add(new Space(
+//                        new MapAxisBox(new PointF(287 / 2, 1085), 287, 2170)
+//                ));
+//                spaces.add(new Space(
+//                        new MapAxisBox(new PointF(287 + (287 / 2), 542.5f / 2), 287, 542.5f)
+//                ));
+//                NavMeshBuilder.connectSpaces(spaces.get(0), spaces.get(1));
 
                 LocationLayer locationLayer = new LocationLayer(mapView, user);
                 handler.addLayer(locationLayer);
 
-                locationLayer.test = spaces;
+                locationLayer.test = TestData.getSpaceList();
 
                 MarkLayer markLayer = new MarkLayer(mapView, user);
                 handler.addLayer(markLayer);
@@ -167,21 +167,21 @@ public class MapLayerTestActivity extends AppCompatActivity {
 
         if (inited) {
             if (keyCode == KeyEvent.KEYCODE_W) {
-                if(b) {
-                    List<PointF> positions = new ArrayList<>();
-
-                    positions.add(MapMath.transformPoint(transformMatrix, new PointF(5, 0)));
-                    positions.add(MapMath.transformPoint(transformMatrix, new PointF(5, 7)));
-                    positions.add(MapMath.transformPoint(transformMatrix, new PointF(0, 7)));
-                    positions.add(MapMath.transformPoint(transformMatrix, new PointF(0, 0)));
-
-                    userHandler.moveUser(positions, 5.0f, true);
-                } else {
-                    userHandler.moveUser(MapMath.transformPoint(transformMatrix, new PointF(5, 7)), 1.0f);
-                }
-                //position.y -= 0.5f;
-                //user.setLookAt(new PointF(0.0f, 1.0f), 0.3f);
-                //handled = true;
+//                if(b) {
+//                    List<PointF> positions = new ArrayList<>();
+//
+//                    positions.add(MapMath.transformPoint(transformMatrix, new PointF(5, 0)));
+//                    positions.add(MapMath.transformPoint(transformMatrix, new PointF(5, 7)));
+//                    positions.add(MapMath.transformPoint(transformMatrix, new PointF(0, 7)));
+//                    positions.add(MapMath.transformPoint(transformMatrix, new PointF(0, 0)));
+//
+//                    userHandler.moveUser(positions, 5.0f, true);
+//                } else {
+//                    userHandler.moveUser(MapMath.transformPoint(transformMatrix, new PointF(5, 7)), 1.0f);
+//                }
+                position.y -= 0.5f;
+//                user.setLookAt(new PointF(0.0f, 1.0f), 0.3f);
+                handled = true;
             } else if (keyCode == KeyEvent.KEYCODE_A) {
                 position.x -= 0.5f;
                 //user.setLookAt(new PointF(-1, 0), 0.3f);
@@ -267,6 +267,10 @@ public class MapLayerTestActivity extends AppCompatActivity {
                 mapView.setContainPointsMode(MapUtils.getPositionListFromGraphicList(marks), false, 500.0f);
             }
 
+            if(handled) {
+                userHandler.moveUser(position, 0.1f);
+                Log.d(TAG, position.toString());
+            }
             //If continious is true it will keep the mark array as a reference
             //mapView.zoomWithinPoints(posis);
         }
