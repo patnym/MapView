@@ -67,15 +67,6 @@ public class SpaceTest {
     }
 
     @Test
-    public void can_get_neighbour_distance() {
-        Space space1 = new Space(new MapAxisBox(new PointF(0, 0),2, 2));
-        Space space2 = new Space(new MapAxisBox(new PointF(2, 0),2, 2));
-        Edge edge12 = new Edge(new PointF(1, 1), new PointF(1, -1));
-        space1.addNeighbour(space2, edge12);
-        Assert.assertEquals(2.0f, space1.getNeighbourDistance(space2));
-    }
-
-    @Test
     public void can_get_neighbour_edge() {
         Space space1 = new Space(new MapAxisBox(new PointF(0, 0),2, 2));
         Space space2 = new Space(new MapAxisBox(new PointF(2, 0),2, 2));
@@ -98,6 +89,16 @@ public class SpaceTest {
         Space space2 = new Space(new MapAxisBox(point(7,0), 3f, 14f));
         Edge edge = space1.findCommonEdge(space2);
         Assert.assertNull(edge);
+    }
+
+    @Test
+    public void can_get_all_edges() {
+        Space space1 = new Space(new MapAxisBox(new PointF(0, 0),2, 2));
+        Space space2 = new Space(new MapAxisBox(new PointF(2, 0),2, 2));
+        Edge edge12 = new Edge(new PointF(1, 1), new PointF(1, -1));
+        space1.addNeighbour(space2, edge12);
+        space2.addNeighbour(space1, edge12);
+        Assert.assertTrue(space1.getEdges().contains(edge12));
     }
     
     //// TODO: 2018-05-27 Write above tests but for a convex shape aswell 

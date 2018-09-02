@@ -8,6 +8,7 @@ import com.onlylemi.mapview.library.utils.MapMath;
 import com.onlylemi.mapview.library.utils.collision.BaseCollisionMesh;
 import com.onlylemi.mapview.library.utils.math.Line;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -38,7 +39,6 @@ public class Space {
             throw new InvalidNeighbourException(
                     "A space cannot reference the same neighbour twice");
         }
-        edge.setCost(MapMath.getDistanceBetweenTwoPoints(shape.getPosition(), space.getPosition()));
         neighbours.put(space, edge);
     }
 
@@ -54,8 +54,8 @@ public class Space {
         return neighbours.keySet();
     }
 
-    public float getNeighbourDistance(Space space) {
-        return neighbours.get(space).getCost();
+    public Collection getEdges() {
+        return neighbours.values();
     }
 
     public Edge getNeighbourEdge(Space space) {
