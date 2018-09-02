@@ -34,4 +34,21 @@ public interface IDiscoverable {
      * @param discoverable
      */
     void addDisposableDiscoverable(IDiscoverable discoverable);
+
+    /**
+     * Set this node as discovered, which means we will not examine it again
+     */
+    void setDiscovered();
+
+    /**
+     * Returns a boolean that indicates if this node has been discovered
+     * @return
+     */
+    boolean isDiscovered();
+
+    /**
+     * Resets the discoverable to the default state.
+     * Must clear any temporary set variables used during pathing
+     */
+    void reset();
 }

@@ -62,7 +62,6 @@ public class EdgeTest {
         Edge edge = new Edge(new PointF(0, 1), new PointF(0, -1));
         Edge edge2= new Edge(new PointF(1, 2), new PointF(1, -2));
         edge.addNeighbour(edge2);
-
         Assert.assertEquals(1.0f, edge.getDiscoverableCost(edge2));
     }
 
@@ -71,6 +70,28 @@ public class EdgeTest {
         Edge edge = new Edge(new PointF(0, 1), new PointF(0, -1));
         Edge tEdge = new Edge(new PointF(1, 1), new PointF(1, -1));
         edge.addDisposableDiscoverable(tEdge);
+        Assert.assertEquals(1, edge.getDiscoverables().size());
+    }
+
+    @Test
+    public void can_set_and_getdiscovered() {
+        Edge edge = new Edge(new PointF(0, 1), new PointF(0, -1));
+        edge.setDiscovered();
+        Assert.assertEquals(true, edge.isDiscovered());
+    }
+
+    @Test
+    public void can_reset_edge() {
+        Edge edge = new Edge(new PointF(0, 1), new PointF(0, -1));
+        Edge tEdge = new Edge(new PointF(1, 1), new PointF(1, -1));
+        Edge rEdge = new Edge(new PointF(-1, 1), new PointF(-1, -1));
+        edge.addNeighbour(rEdge);
+        edge.addDisposableDiscoverable(tEdge);
+        edge.setDiscovered();
+        Assert.assertEquals(2, edge.getDiscoverables().size());
+        Assert.assertEquals(true, edge.isDiscovered());
+        edge.reset();
+        Assert.assertEquals(false, edge.isDiscovered());
         Assert.assertEquals(1, edge.getDiscoverables().size());
     }
 }

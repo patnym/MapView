@@ -3,6 +3,7 @@ package com.onlylemi.mapview.library.navigation;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.PointF;
+import android.util.Log;
 
 import com.onlylemi.mapview.library.exceptions.InvalidNeighbourException;
 import com.onlylemi.mapview.library.utils.MapMath;
@@ -18,10 +19,13 @@ import java.util.List;
 
 public class Edge implements IDiscoverable {
 
+    private static String TAG = "Edge";
+
     protected Collection<IDiscoverable> neighbours = new ArrayList<>();
     protected Collection<IDiscoverable> tempNeighbours = new ArrayList<>();
     private Collection<IDiscoverable> currentNeighbours = new ArrayList<>();
     protected Line line;
+    protected boolean isDiscovered = false;
 
     public Edge() {
     }
@@ -43,6 +47,10 @@ public class Edge implements IDiscoverable {
     }
 
     public void setNeighbours(Collection<? extends IDiscoverable> neighbours) {
+        if(!this.neighbours.isEmpty()) {
+            Log.w(TAG, "Calling setNeighbours when they'ave already been set. " +
+                    "This could mess up the pathing. Consider calling reset afterwards to correct any non-init values");
+        }
         this.neighbours = (Collection<IDiscoverable>) neighbours;
     }
 
@@ -50,7 +58,12 @@ public class Edge implements IDiscoverable {
         if(neighbours.contains(neighbour)) {
             throw new InvalidNeighbourException("Cannot add the same neighbour twice");
         }
+        if(!tempNeighbours.isEmpty()) {
+            Log.w(TAG, "Adding static neighbours after temp neighbours have been added could cause " +
+                    "unwanted behaviours.");
+        }
         neighbours.add(neighbour);
+        currentNeighbours.add(neighbour);
     }
 
     @Override
@@ -71,9 +84,26 @@ public class Edge implements IDiscoverable {
     @Override
     public void addDisposableDiscoverable(IDiscoverable discoverable) {
         tempNeighbours.add(discoverable);
-
         currentNeighbours.clear();
         currentNeighbours.addAll(neighbours);
         currentNeighbours.addAll(tempNeighbours);
+    }
+
+    @Override
+    public void setDiscovered() {
+        isDiscovered = true;
+    }
+
+    @Override
+    public boolean isDiscovered() {
+        return isDiscovered;
+    }
+
+    @Override
+    public void reset() {
+        currentNeighbours.clear();
+        currentNeighbours.addAll(neighbours);
+        tempNeighbours.clear();
+        isDiscovered = false;
     }
 }
