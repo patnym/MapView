@@ -3,6 +3,7 @@ package com.onlylemi.mapview.library.layer;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.PointF;
 import android.os.Bundle;
 import android.os.Handler;
@@ -17,6 +18,8 @@ import com.onlylemi.mapview.library.graphics.implementation.LocationUser;
 import com.onlylemi.mapview.library.layer.handlers.BaseLayerHandler;
 import com.onlylemi.mapview.library.messages.ICommand;
 import com.onlylemi.mapview.library.messages.MessageDefenitions;
+import com.onlylemi.mapview.library.navigation.NavMesh;
+import com.onlylemi.mapview.library.navigation.PathInfo;
 import com.onlylemi.mapview.library.navigation.Space;
 
 import java.util.List;
@@ -34,6 +37,12 @@ public class LocationLayer extends MapBaseLayer {
 
     private Paint locationPaint;
     public List<Space> test;
+    private NavMesh navMesh;
+
+    public void setNavMesh(NavMesh navMesh) {
+        test = navMesh.getSpaceStruct();
+        this.navMesh = navMesh;
+    }
 
     //Outside usage use this handler to interact with the user
     private UserHandler handler;
@@ -49,6 +58,8 @@ public class LocationLayer extends MapBaseLayer {
         locationPaint.setAntiAlias(true);
         locationPaint.setFilterBitmap(true);
         locationPaint.setDither(true);
+        locationPaint.setStrokeWidth(10.0f);
+        locationPaint.setStyle(Paint.Style.STROKE);
     }
 
     @Override
@@ -56,17 +67,32 @@ public class LocationLayer extends MapBaseLayer {
     {
 
     }
-
     @Override
     public boolean update(Matrix currentMatrix, long deltaTime) {
         hasChanged = user.update(currentMatrix, deltaTime);
+
+
         return hasChanged;
     }
-
+    PathInfo p;
+    Path path;
     @Override
     public void draw(Canvas canvas, Matrix currentMatrix, float currentZoom, long deltaTime) {
         if (isVisible) {
             user.draw(canvas, locationPaint);
+            p = navMesh.findPath(user.getPosition(), new PointF(25f, 92f));
+            path = new Path();
+            path.moveTo(user.position.x, user.position.y);
+            for (int i = 0; i < p.getPath().size(); i++) {
+                PointF pos = p.getPath().get(i);
+                path.lineTo(pos.x, pos.y);
+            }
+            //path.transform(currentMatrix);
+            if(path != null) {
+                Path tPath = new Path();
+                path.transform(currentMatrix, tPath);
+                canvas.drawPath(tPath, locationPaint);
+            }
         }
         super.draw(canvas, currentMatrix, currentZoom, deltaTime);
     }

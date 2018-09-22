@@ -23,6 +23,8 @@ import com.onlylemi.mapview.library.graphics.implementation.StaticMark;
 import com.onlylemi.mapview.library.layer.LocationLayer;
 import com.onlylemi.mapview.library.layer.MarkLayer;
 import com.onlylemi.mapview.library.layer.RouteLayer;
+import com.onlylemi.mapview.library.navigation.AStarPather;
+import com.onlylemi.mapview.library.navigation.NavMesh;
 import com.onlylemi.mapview.library.navigation.NavMeshBuilder;
 import com.onlylemi.mapview.library.navigation.Space;
 import com.onlylemi.mapview.library.utils.MapMath;
@@ -43,7 +45,7 @@ public class MapLayerTestActivity extends AppCompatActivity {
     private List<ProximityMark> marks = new ArrayList<>();
 
     private Matrix transformMatrix;
-    private PointF position = new PointF(1.4f, 2.0f);
+    private PointF position = new PointF(90f, 260f);
 
     private LocationLayer.UserHandler userHandler;
     private MarkLayer.MarkHandler markHandler;
@@ -82,7 +84,7 @@ public class MapLayerTestActivity extends AppCompatActivity {
                     Bitmap map = BitmapFactory.decodeStream(getAssets().open("bromma_floor_plan810.png"));
                     handler.createMap(map);
                     transformMatrix = MapMath.createMappingMatrix(map, 5, 7, new PointF(0, 0), new PointF(map.getWidth(), map.getHeight()));   //<--------- THIS IS FOR THE BACKEND ROOM PNG
-                    user = new LocationUser(BitmapFactory.decodeStream(getAssets().open("marker.png")), MapMath.transformPoint(transformMatrix, position), new PointF(1, 0));
+                    user = new LocationUser(BitmapFactory.decodeStream(getAssets().open("marker.png")),  position, new PointF(1, 0));
                 } catch(IOException ex) {
                     ex.printStackTrace();
                     return;
@@ -99,8 +101,7 @@ public class MapLayerTestActivity extends AppCompatActivity {
 
                 LocationLayer locationLayer = new LocationLayer(mapView, user);
                 handler.addLayer(locationLayer);
-
-                locationLayer.test = TestData.getSpaceList();
+                locationLayer.setNavMesh(new NavMesh(TestData.getSpaceList(), new AStarPather()));
 
                 MarkLayer markLayer = new MarkLayer(mapView, user);
                 handler.addLayer(markLayer);
@@ -159,6 +160,7 @@ public class MapLayerTestActivity extends AppCompatActivity {
 
     boolean b = true;
     boolean force = false;
+    private float speed = 2;
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -179,19 +181,19 @@ public class MapLayerTestActivity extends AppCompatActivity {
 //                } else {
 //                    userHandler.moveUser(MapMath.transformPoint(transformMatrix, new PointF(5, 7)), 1.0f);
 //                }
-                position.y -= 0.5f;
+                position.y -= speed;
 //                user.setLookAt(new PointF(0.0f, 1.0f), 0.3f);
                 handled = true;
             } else if (keyCode == KeyEvent.KEYCODE_A) {
-                position.x -= 0.5f;
+                position.x -= speed;
                 //user.setLookAt(new PointF(-1, 0), 0.3f);
                 handled = true;
             } else if (keyCode == KeyEvent.KEYCODE_S) {
-                position.y += 0.5f;
+                position.y += speed;
                 //user.setLookAt(new PointF(0.0f, -1.0f), 0.3f);
                 handled = true;
             } else if (keyCode == KeyEvent.KEYCODE_D) {
-                position.x += 0.5f;
+                position.x += speed;
                 //user.setLookAt(new PointF(1, 0), 0.3f);
                 handled = true;
             }

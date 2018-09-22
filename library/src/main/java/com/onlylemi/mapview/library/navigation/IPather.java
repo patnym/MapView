@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface IPather {
     void setSpaceStruct(List<Space> spaceStruct);
+    PathInfo findPath(IDiscoverable source, IDiscoverable target);
 }

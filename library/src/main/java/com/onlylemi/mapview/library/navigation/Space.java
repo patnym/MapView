@@ -54,7 +54,7 @@ public class Space {
         return neighbours.keySet();
     }
 
-    public Collection getEdges() {
+    public Collection<Edge> getEdges() {
         return neighbours.values();
     }
 

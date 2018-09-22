@@ -37,7 +37,36 @@ public class NavMesh {
         return null;
     }
 
-    //public List<PointF> findPath()
+    public PathInfo findPath(PointF start, PointF destination) {
+
+        Space startSpace = findSpaceFromPoint(start);
+        Space destinationSpace = findSpaceFromPoint(destination);
+
+        if(startSpace == null || destinationSpace == null) {
+            return PathInfo.NoPathFound();
+        }
+
+        if(startSpace == destinationSpace) {
+            return PathInfo.SinglePathTo(destination);
+        }
+
+        IDiscoverable startNode = createDiscoverableFromPosition(start, startSpace);
+        IDiscoverable stopNode = createDiscoverableFromPosition(destination, destinationSpace);
+        return pather.findPath(startNode, stopNode);
+    }
+
+    private IDiscoverable createDiscoverableFromPosition(PointF position, Space positionInSpace) {
+        //Create edge which has midpoint at point
+        IDiscoverable discoverable = new Edge(new PointF(position.x - 1, position.y),
+                new PointF(position.x + 1, position.y));
+
+        for(Edge edge : positionInSpace.getEdges()) {
+            edge.addDisposableDiscoverable(discoverable);
+            discoverable.addDisposableDiscoverable(edge);
+        }
+
+        return discoverable;
+    }
 
     //region getset
 
