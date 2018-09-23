@@ -22,6 +22,7 @@ import com.onlylemi.mapview.library.graphics.implementation.ProximityMark;
 import com.onlylemi.mapview.library.graphics.implementation.StaticMark;
 import com.onlylemi.mapview.library.layer.LocationLayer;
 import com.onlylemi.mapview.library.layer.MarkLayer;
+import com.onlylemi.mapview.library.layer.NavigationLayer;
 import com.onlylemi.mapview.library.layer.RouteLayer;
 import com.onlylemi.mapview.library.navigation.AStarPather;
 import com.onlylemi.mapview.library.navigation.NavMesh;
@@ -50,6 +51,7 @@ public class MapLayerTestActivity extends AppCompatActivity {
     private LocationLayer.UserHandler userHandler;
     private MarkLayer.MarkHandler markHandler;
 
+    private NavigationLayer navLayer;
     private LocationLayer locationLayer;
     private MarkLayer markLayer;
     private RouteLayer routeLayer;
@@ -89,19 +91,13 @@ public class MapLayerTestActivity extends AppCompatActivity {
                     ex.printStackTrace();
                     return;
                 }
-
-//                List<Space> spaces = new ArrayList<>();
-//                spaces.add(new Space(
-//                        new MapAxisBox(new PointF(287 / 2, 1085), 287, 2170)
-//                ));
-//                spaces.add(new Space(
-//                        new MapAxisBox(new PointF(287 + (287 / 2), 542.5f / 2), 287, 542.5f)
-//                ));
-//                NavMeshBuilder.connectSpaces(spaces.get(0), spaces.get(1));
+                NavMesh navMesh = new NavMesh(TestData.getSpaceList(), new AStarPather());
+                navLayer = new NavigationLayer(mapView, navMesh, user);
+                handler.addLayer(navLayer);
 
                 LocationLayer locationLayer = new LocationLayer(mapView, user);
                 handler.addLayer(locationLayer);
-                locationLayer.setNavMesh(new NavMesh(TestData.getSpaceList(), new AStarPather()));
+                //locationLayer.setNavMesh(new NavMesh(TestData.getSpaceList(), new AStarPather()));
 
                 MarkLayer markLayer = new MarkLayer(mapView, user);
                 handler.addLayer(markLayer);
@@ -140,6 +136,8 @@ public class MapLayerTestActivity extends AppCompatActivity {
                 mapView.setDebug(true);
                 //userHandler.moveUser(MapMath.transformPoint(transformMatrix, new PointF(1.4f, 2.0f)), 5.0f);
                 mapView.setContainerUserMode();
+
+                navLayer.navigateTo(25f, 92f);
             }
         });
 

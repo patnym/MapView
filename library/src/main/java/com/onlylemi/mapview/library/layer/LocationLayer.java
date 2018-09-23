@@ -80,19 +80,19 @@ public class LocationLayer extends MapBaseLayer {
     public void draw(Canvas canvas, Matrix currentMatrix, float currentZoom, long deltaTime) {
         if (isVisible) {
             user.draw(canvas, locationPaint);
-            p = navMesh.findPath(user.getPosition(), new PointF(25f, 92f));
-            path = new Path();
-            path.moveTo(user.position.x, user.position.y);
-            for (int i = 0; i < p.getPath().size(); i++) {
-                PointF pos = p.getPath().get(i);
-                path.lineTo(pos.x, pos.y);
-            }
-            //path.transform(currentMatrix);
-            if(path != null) {
-                Path tPath = new Path();
-                path.transform(currentMatrix, tPath);
-                canvas.drawPath(tPath, locationPaint);
-            }
+//            p = navMesh.findPath(user.getPosition(), new PointF(25f, 92f));
+//            path = new Path();
+//            path.moveTo(user.position.x, user.position.y);
+//            for (int i = 0; i < p.getPath().size(); i++) {
+//                PointF pos = p.getPath().get(i);
+//                path.lineTo(pos.x, pos.y);
+//            }
+//            //path.transform(currentMatrix);
+//            if(path != null) {
+//                Path tPath = new Path();
+//                path.transform(currentMatrix, tPath);
+//                canvas.drawPath(tPath, locationPaint);
+//            }
         }
         super.draw(canvas, currentMatrix, currentZoom, deltaTime);
     }
@@ -101,9 +101,6 @@ public class LocationLayer extends MapBaseLayer {
     public void debugDraw(Canvas canvas, Matrix currentMatrix) {
         if(isVisible) {
             user.debugDraw(currentMatrix, canvas);
-        }
-        for(int i = 0; i < test.size(); i++) {
-            test.get(i).debugDraw(currentMatrix, canvas);
         }
     }
 
