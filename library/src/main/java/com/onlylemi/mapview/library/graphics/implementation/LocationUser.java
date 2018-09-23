@@ -49,8 +49,6 @@ public class LocationUser extends BaseGraphics {
     //Assumes the bmp looks to the right by default
     public LocationUser(Bitmap bmp, PointF position, PointF lookAt) {
         this(bmp, position, new PointF(1, 0), lookAt);
-        mMatrix = new Matrix();
-        tMatrix = new Matrix();
     }
 
     /**
@@ -61,9 +59,11 @@ public class LocationUser extends BaseGraphics {
      * @param lookAt Look at direciton, start rotation of bmp (normalized direction (Using point as a vector here))
      */
     public LocationUser(Bitmap bmp, PointF position, PointF startDir, PointF lookAt) {
+        mMatrix = new Matrix();
+        tMatrix = new Matrix();
         this.bmp = bmp;
         this.position = position;
-        this.startDir = new PointF(-1.0f, 0.0f);
+        this.startDir = startDir;
         this.setLookAt(lookAt);
         this.worldMidPosition = new PointF(bmp.getWidth() / 2, bmp.getHeight() / 2);
         this.radius = bmp.getHeight() > bmp.getWidth() ? bmp.getHeight() / 2 : bmp.getWidth() / 2;

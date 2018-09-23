@@ -148,5 +148,13 @@ public class LocationLayer extends MapBaseLayer {
             });
         }
 
+        public void rotateUser(final PointF direction, final float duration) {
+            runOnRenderThread(new ICommand() {
+                @Override
+                public void execute() {
+                    user.setLookAt(direction, duration);
+                }
+            });
+        }
     }
 }

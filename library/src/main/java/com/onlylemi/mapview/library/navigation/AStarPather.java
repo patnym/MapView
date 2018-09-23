@@ -1,6 +1,7 @@
 package com.onlylemi.mapview.library.navigation;
 
 import android.graphics.PointF;
+import android.util.Log;
 
 import com.onlylemi.mapview.library.navigation.IPather;
 import com.onlylemi.mapview.library.navigation.Space;
@@ -43,6 +44,8 @@ public class AStarPather implements IPather{
         costMap = new HashMap<>();
         parentMap = new HashMap<>();
 
+        long time = System.nanoTime();
+
         TreeSet<IDiscoverable> unvisitedNodes = new TreeSet(new Comparator<IDiscoverable>() {
             @Override
             public int compare(IDiscoverable o, IDiscoverable t1) {
@@ -72,7 +75,7 @@ public class AStarPather implements IPather{
 
                 //Check if we are looking at an end node
                 if (currentNode == target) {
-
+                    Log.e("ASTAR", "Found path in: " + ((System.nanoTime() - time) / 1000000.0f) + " miliseconds");
                     List<PointF> pathToAdd = new ArrayList<>();
                     while (parentMap.containsKey(currentNode)) {
                         pathToAdd.add(0, currentNode.getPosition());

@@ -6,6 +6,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
+import android.util.Log;
 
 import com.onlylemi.mapview.library.MapView;
 import com.onlylemi.mapview.library.camera.MapViewCamera;
@@ -13,6 +14,7 @@ import com.onlylemi.mapview.library.graphics.implementation.LocationUser;
 import com.onlylemi.mapview.library.navigation.NavMesh;
 import com.onlylemi.mapview.library.navigation.PathInfo;
 import com.onlylemi.mapview.library.navigation.Space;
+import com.onlylemi.mapview.library.utils.MapMath;
 
 import java.util.List;
 
@@ -65,7 +67,10 @@ public class NavigationLayer extends MapBaseLayer {
 
         //For now we just generate the path we wanna walk
         if(hasDestination()) {
+            long time = System.nanoTime();
             pathInfo = navMesh.findPath(user.getPosition(), navigatingTo);
+            Log.d("NavigationLayer", "Ran pathing in: " + ((System.nanoTime() - time) / 1000000.0f) + " miliseconds");
+            navigatingTo = null;
         }
 
         return pathInfo.isPathFound();

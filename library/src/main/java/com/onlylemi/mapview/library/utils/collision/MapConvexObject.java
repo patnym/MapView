@@ -40,7 +40,7 @@ public class MapConvexObject extends BaseCollisionMesh {
         }
         if(!isShapeConvex(collisionLines)) {
             throw new IllegalArgumentException("Shape must be convex, " +
-                    "AKA: All sides must turn the same direction");
+                    "AKA: All sides must turn the same direction" + shape.toString());
         }
     }
 

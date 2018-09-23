@@ -46,7 +46,7 @@ public class MapLayerTestActivity extends AppCompatActivity {
     private List<ProximityMark> marks = new ArrayList<>();
 
     private Matrix transformMatrix;
-    private PointF position = new PointF(90f, 260f);
+    private PointF position = new PointF(296f, 35f);
 
     private LocationLayer.UserHandler userHandler;
     private MarkLayer.MarkHandler markHandler;
@@ -83,15 +83,14 @@ public class MapLayerTestActivity extends AppCompatActivity {
             @Override
             public void onSetup(MapViewSetupHandler handler) {
                 try {
-                    Bitmap map = BitmapFactory.decodeStream(getAssets().open("bromma_floor_plan810.png"));
+                    Bitmap map = BitmapFactory.decodeStream(getAssets().open("navmeshed-map.png"));
                     handler.createMap(map);
-                    transformMatrix = MapMath.createMappingMatrix(map, 5, 7, new PointF(0, 0), new PointF(map.getWidth(), map.getHeight()));   //<--------- THIS IS FOR THE BACKEND ROOM PNG
-                    user = new LocationUser(BitmapFactory.decodeStream(getAssets().open("marker.png")),  position, new PointF(1, 0));
+                    user = new LocationUser(BitmapFactory.decodeStream(getAssets().open("user-marker.png")),  position, new PointF(0, 1), new PointF(0, 1));
                 } catch(IOException ex) {
                     ex.printStackTrace();
                     return;
                 }
-                NavMesh navMesh = new NavMesh(TestData.getSpaceList(), new AStarPather());
+                NavMesh navMesh = new NavMesh(TestData.getNavMeshMapSpaceStruct(), new AStarPather());
                 navLayer = new NavigationLayer(mapView, navMesh, user);
                 handler.addLayer(navLayer);
 
@@ -159,6 +158,7 @@ public class MapLayerTestActivity extends AppCompatActivity {
     boolean b = true;
     boolean force = false;
     private float speed = 2;
+    private float rotationDuration = 0.1f;
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -167,32 +167,20 @@ public class MapLayerTestActivity extends AppCompatActivity {
 
         if (inited) {
             if (keyCode == KeyEvent.KEYCODE_W) {
-//                if(b) {
-//                    List<PointF> positions = new ArrayList<>();
-//
-//                    positions.add(MapMath.transformPoint(transformMatrix, new PointF(5, 0)));
-//                    positions.add(MapMath.transformPoint(transformMatrix, new PointF(5, 7)));
-//                    positions.add(MapMath.transformPoint(transformMatrix, new PointF(0, 7)));
-//                    positions.add(MapMath.transformPoint(transformMatrix, new PointF(0, 0)));
-//
-//                    userHandler.moveUser(positions, 5.0f, true);
-//                } else {
-//                    userHandler.moveUser(MapMath.transformPoint(transformMatrix, new PointF(5, 7)), 1.0f);
-//                }
                 position.y -= speed;
-//                user.setLookAt(new PointF(0.0f, 1.0f), 0.3f);
+                //userHandler.rotateUser(new PointF(0.0f, -1.0f), rotationDuration);
                 handled = true;
             } else if (keyCode == KeyEvent.KEYCODE_A) {
                 position.x -= speed;
-                //user.setLookAt(new PointF(-1, 0), 0.3f);
+                //userHandler.rotateUser(new PointF(1.0f, 0.0f), rotationDuration);
                 handled = true;
             } else if (keyCode == KeyEvent.KEYCODE_S) {
                 position.y += speed;
-                //user.setLookAt(new PointF(0.0f, -1.0f), 0.3f);
+                //userHandler.rotateUser(new PointF(0.0f, -1.0f), rotationDuration);
                 handled = true;
             } else if (keyCode == KeyEvent.KEYCODE_D) {
                 position.x += speed;
-                //user.setLookAt(new PointF(1, 0), 0.3f);
+                //userHandler.rotateUser(new PointF(-1.0f, 0.0f), rotationDuration);
                 handled = true;
             }
 
