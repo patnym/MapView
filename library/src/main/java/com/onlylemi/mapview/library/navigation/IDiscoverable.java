@@ -47,6 +47,14 @@ public interface IDiscoverable {
     boolean isDiscovered();
 
     /**
+     * Sets the current cost to move to this discoverable
+     * @param cost
+     */
+    void setCost(float cost);
+
+    float getCost();
+
+    /**
      * Resets the discoverable to the default state.
      * Must clear any temporary set variables used during pathing
      */

@@ -15,6 +15,8 @@ import org.robolectric.RobolectricTestRunner;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import static com.onlylemi.mapview.TestHelper.point;
+
 /**
  * Created by patnym on 2018-05-06.
  */
@@ -81,6 +83,14 @@ public class EdgeTest {
     }
 
     @Test
+    public void can_get_and_set_cost() {
+        Edge edge = new Edge(point(0, 0), point(2, 0));
+        edge.setCost(20.0f);
+        float cost = edge.getCost();
+        Assert.assertEquals(20.0f, cost);
+    }
+
+    @Test
     public void can_reset_edge() {
         Edge edge = new Edge(new PointF(0, 1), new PointF(0, -1));
         Edge tEdge = new Edge(new PointF(1, 1), new PointF(1, -1));
@@ -88,10 +98,13 @@ public class EdgeTest {
         edge.addNeighbour(rEdge);
         edge.addDisposableDiscoverable(tEdge);
         edge.setDiscovered();
+        edge.setCost(20.0f);
         Assert.assertEquals(2, edge.getDiscoverables().size());
         Assert.assertEquals(true, edge.isDiscovered());
+        Assert.assertEquals(20.0f, edge.getCost());
         edge.reset();
         Assert.assertEquals(false, edge.isDiscovered());
         Assert.assertEquals(1, edge.getDiscoverables().size());
+        Assert.assertEquals(Float.MAX_VALUE, edge.getCost());
     }
 }

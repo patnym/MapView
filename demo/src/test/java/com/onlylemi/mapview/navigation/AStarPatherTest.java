@@ -58,6 +58,12 @@ public class AStarPatherTest {
     }
 
     @Test
+    public void can_navigate_twice() {
+        can_navigate_from_s1_to_s5();
+        can_navigate_from_s1_to_s5();
+    }
+
+    @Test
     public void can_navigate_on_same_space() {
         PathInfo path = navMesh.findPath(point(1, 1), point(2, 2));
         Assert.assertEquals(point(2, 2), path.getPath().get(0));

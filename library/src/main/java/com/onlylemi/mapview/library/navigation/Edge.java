@@ -26,15 +26,19 @@ public class Edge implements IDiscoverable {
     private Collection<IDiscoverable> currentNeighbours = new ArrayList<>();
     protected Line line;
     protected boolean isDiscovered = false;
+    private float cost;
 
     public Edge() {
+        reset();
     }
 
     public Edge(PointF start, PointF stop) {
+        this();
         this.line = new Line(start, stop);
     }
 
     public Edge(Line line) {
+        this();
         this.line = line;
     }
 
@@ -100,10 +104,21 @@ public class Edge implements IDiscoverable {
     }
 
     @Override
+    public void setCost(float cost) {
+        this.cost = cost;
+    }
+
+    @Override
+    public float getCost() {
+        return cost;
+    }
+
+    @Override
     public void reset() {
         currentNeighbours.clear();
         currentNeighbours.addAll(neighbours);
         tempNeighbours.clear();
         isDiscovered = false;
+        cost = Float.MAX_VALUE;
     }
 }
